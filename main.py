@@ -6,7 +6,7 @@ a = 1
 while a != 3:
     a = int(input('0) Enter Object ID\n1) Basic search\n2) Refined search\n3) End\n>> '))
     if a == 0:
-        id = input('>>Object ID: ')
+        id = input('>> Object ID: ')
     if a == 1:
         search_lcf = lk.search_lightcurve(id)
         #search_lcf = lk.search_lightcurve('TIC 233310793')
