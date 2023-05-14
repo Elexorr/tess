@@ -20,11 +20,15 @@ while a != 3:
         lcf = search_lcf_refined.download_all()
         #print(lcf[0])
         #print(lcf[0])
-        choose = int(input('number: '))
-        #adu = lcf[]
-        #print(adu)
-        lcf[choose].plot()
-        plt.show()
+        b = 1
+        while b == 1:
+            b = int(input('1) #:\n2) End\n>> '))
+            #adu = lcf[]
+            #print(adu)
+            if b == 1:
+                choose = int(input('>> #: '))
+                lcf[choose].plot()
+                plt.show()
     #if a != 1 and a != 2 and a != 3:
     #    print('Invalid selection')
 print('Bye!')
