@@ -4,6 +4,7 @@ from tkinter import ttk
 import lightkurve as lk
 # import numpy as np
 import matplotlib.pyplot as plt
+from astroquery.simbad import Simbad
 # from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.backends.backend_tkagg import NavigationToolbar2Tk
@@ -98,4 +99,10 @@ curve_plot_button = ttk.Button(frame1, text='Plot Curve', command=curve_plot)
 curve_plot_button.place(x=400, y=5)
 
 
+#def get_ids():
+#    result_table = Simbad.query_objectids(obj_name.get())
+#    print(result_table)
+
+
+#get_ids
 root.mainloop()
