@@ -5,7 +5,8 @@ import lightkurve as lk
 # import numpy as np
 import matplotlib.pyplot as plt
 # from matplotlib.figure import Figure
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.backends.backend_tkagg import NavigationToolbar2Tk
 
 root = tk.Tk()
 root.title('TESS project')
@@ -79,10 +80,32 @@ refined_search_button.place(x=300, y=5)
 def curve_plot():
     x = lcf[sector_num.get()].time.value
     y = lcf[sector_num.get()].flux
-    fig = plt.Figure(figsize=(9.5,6), dpi = 100)
+    fig = plt.Figure(figsize=(8,6), dpi = 100)
     fig.add_subplot(111).plot(x, y, "bo")
-    chart = FigureCanvasTkAgg(fig, window)
-    chart.get_tk_widget().pack()
+
+    canvas = FigureCanvasTkAgg(fig, master=window)
+    canvas.draw()
+    #canvas.get_tk_widget().pack(side=Tk.TOP, fill=Tk.BOTH, expand=1)
+    canvas.get_tk_widget().pack()
+
+    toolbar = NavigationToolbar2Tk(canvas, window)
+    toolbar.update()
+    #canvas._tkcanvas.pack(side=Tk.TOP, fill=Tk.BOTH, expand=1)
+    canvas._tkcanvas.pack()
+
+    #canv = FigureCanvasTkAgg(fig, window)
+    #canv.draw()
+    #canv.get_tk_widget().grid(row=2, column=0)
+    #frame = Frame(window)
+    #frame.grid(row=0, column=1)
+    #toolbar = NavigationToolbar2Tk(canv, frame, pack_toolbar=False)
+    #canv.get_tk_widget().grid(row=1, column=0)
+
+    #chart = FigureCanvasTkAgg(fig, window)
+    #chart.get_tk_widget().pack()
+    #toolbar_frame = Frame(chart)
+    #toolbar_frame.grid(row=21,column=4,columnspan=2)
+    #toolbar = NavigationToolbar2Tk(chart, toolbar_frame)
     #lcf[sector_num.get()].plot()
     #plt.show()
 
