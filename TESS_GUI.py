@@ -5,7 +5,7 @@ import lightkurve as lk
 # import numpy as np
 import matplotlib.pyplot as plt
 # from matplotlib.figure import Figure
-# from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 
 root = tk.Tk()
 root.title('TESS project')
@@ -77,8 +77,14 @@ refined_search_button.place(x=300, y=5)
 
 
 def curve_plot():
-    lcf[sector_num.get()].plot()
-    plt.show()
+    x = lcf[sector_num.get()].time.value
+    y = lcf[sector_num.get()].flux
+    fig = plt.Figure(figsize=(9.5,6), dpi = 100)
+    fig.add_subplot(111).plot(x, y, "bo")
+    chart = FigureCanvasTkAgg(fig, window)
+    chart.get_tk_widget().pack()
+    #lcf[sector_num.get()].plot()
+    #plt.show()
 
 
 curve_plot_button = ttk.Button(frame1, text='Plot Curve', command=curve_plot)
