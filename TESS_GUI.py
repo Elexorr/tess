@@ -2,12 +2,13 @@ import tkinter as tk
 from tkinter import *
 from tkinter import ttk
 import lightkurve as lk
-# import numpy as np
+import numpy as np
 import matplotlib.pyplot as plt
 from astroquery.simbad import Simbad
 # from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.backends.backend_tkagg import NavigationToolbar2Tk
+import auxiliary as aux
 
 root = tk.Tk()
 root.title('TESS project')
@@ -15,6 +16,7 @@ root.resizable(True, False)
 
 screen_x = root.winfo_screenwidth()
 screen_y = root.winfo_screenheight()
+print(screen_x, screen_y)
 
 window = tk.Canvas(master=root, width=screen_x-558, height=screen_y-50, bg='white')
 window.grid(row=0, column=1, sticky='N')
@@ -54,9 +56,11 @@ sector_num_entered.place(x=300, y=35)
 
 def basic_search():
     search_lcf = lk.search_lightcurve(obj_name.get())
-    # search_lcf = lk.search_lightcurve('TIC 233310793')
     T.insert(INSERT, '\n')
     T.insert(INSERT, search_lcf)
+    aux.find_authors(search_lcf.author)
+    aux.find_exptimes(search_lcf.exptime)
+    #print(search_lcf.exptime[0])
     T.see(tk.END)
 
 
@@ -81,7 +85,10 @@ refined_search_button.place(x=300, y=5)
 def curve_plot():
     x = lcf[sector_num.get()].time.value
     y = lcf[sector_num.get()].flux
-    fig = plt.Figure(figsize=(8,6), dpi = 100)
+    figx = (screen_x-558)/100
+    figy = (figx * 0.5625)
+    #print(figx, figy)
+    fig = plt.Figure(figsize=(figx, figy), dpi = 100)
     fig.add_subplot(111).plot(x, y, "ro")
 
     canvas = FigureCanvasTkAgg(fig, master=window)
