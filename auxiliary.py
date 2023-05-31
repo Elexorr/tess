@@ -5,7 +5,8 @@ def find_authors(l):
             pass
         else:
             authors.append(l[i])
-    print(authors)
+    #print(authors)
+    return authors
 
 
 def find_exptimes(e):
@@ -18,4 +19,5 @@ def find_exptimes(e):
     for k in range (0, len(exptimes)):
         if '.' in exptimes[k]:
             exptimes[k] = exptimes[k][0:3]
-    print(exptimes)
+    #print(exptimes)
+    return exptimes

@@ -18,6 +18,7 @@ screen_x = root.winfo_screenwidth()
 screen_y = root.winfo_screenheight()
 print(screen_x, screen_y)
 
+global window
 window = tk.Canvas(master=root, width=screen_x-558, height=screen_y-50, bg='white')
 window.grid(row=0, column=1, sticky='N')
 frame1 = tk.Frame(master=root, width=558, height=screen_y-50, bg='grey')
@@ -38,14 +39,20 @@ obj_name_entered.place(x=65, y=8)
 author_label = tk.Label(master=frame1, font=('Helvetica', 10), text='Author:', bg='grey')
 author_label.place(x=5, y=35)
 author_name = tk.StringVar()
-author_name_entered = ttk.Entry(frame1, width=10, textvariable=author_name)
-author_name_entered.place(x=65, y=35)
+
+global found_authors
+found_authors = []
+author_selection = ttk.Combobox(frame1, value=found_authors)
+author_selection.place(x=65, y=35)
 
 exptime_label = tk.Label(master=frame1, font=('Helvetica', 10), text='Exptime:', bg='grey')
-exptime_label.place(x=150, y=35)
+exptime_label.place(x=5, y=62)
 exptime = tk.IntVar()
-exptime_entered = ttk.Entry(frame1, width=6, textvariable=exptime)
-exptime_entered.place(x=205, y=35)
+
+global found_exptimes
+found_exptimes = []
+exptime_selection = ttk.Combobox(frame1, value=found_exptimes)
+exptime_selection.place(x=65, y=62)
 
 sector_label = tk.Label(master=frame1, font=('Helvetica', 10), text='#:', bg='grey')
 sector_label.place(x=270, y=35)
@@ -58,8 +65,14 @@ def basic_search():
     search_lcf = lk.search_lightcurve(obj_name.get())
     T.insert(INSERT, '\n')
     T.insert(INSERT, search_lcf)
-    aux.find_authors(search_lcf.author)
-    aux.find_exptimes(search_lcf.exptime)
+    found_authors = aux.find_authors(search_lcf.author)
+    global author_selection
+    author_selection = ttk.Combobox(frame1, value=found_authors)
+    author_selection.place(x=65, y=35)
+    found_exptimes = aux.find_exptimes(search_lcf.exptime)
+    global exptime_selection
+    exptime_selection = ttk.Combobox(frame1, value=found_exptimes)
+    exptime_selection.place(x=65, y=62)
     #print(search_lcf.exptime[0])
     T.see(tk.END)
 
@@ -69,7 +82,7 @@ basic_search_button.place(x=205, y=5)
 
 
 def refined_search():
-    search_lcf_refined = lk.search_lightcurve(obj_name.get(), author=author_name.get(), exptime=exptime.get())
+    search_lcf_refined = lk.search_lightcurve(obj_name.get(), author=str(author_selection.get()), exptime=exptime_selection.get())
     T.insert(INSERT, '\n')
     T.insert(INSERT, search_lcf_refined)
     T.see(tk.END)
@@ -83,33 +96,26 @@ refined_search_button.place(x=300, y=5)
 
 
 def curve_plot():
+    global window
+    window = tk.Canvas(master=root, width=screen_x - 558, height=screen_y - 50, bg='white')
+    window.grid(row=0, column=1, sticky='N')
     x = lcf[sector_num.get()].time.value
     y = lcf[sector_num.get()].flux
     figx = (screen_x-558)/100
     figy = (figx * 0.5625)
-    #print(figx, figy)
     fig = plt.Figure(figsize=(figx, figy), dpi = 100)
     fig.add_subplot(111).plot(x, y, "ro")
-
     canvas = FigureCanvasTkAgg(fig, master=window)
     canvas.draw()
-    #canvas.get_tk_widget().pack(side=Tk.TOP, fill=Tk.BOTH, expand=1)
     canvas.get_tk_widget().pack()
-
     toolbar = NavigationToolbar2Tk(canvas, window)
     toolbar.update()
-    #canvas._tkcanvas.pack(side=Tk.TOP, fill=Tk.BOTH, expand=1)
     canvas._tkcanvas.pack()
+    global plott
 
 
 curve_plot_button = ttk.Button(frame1, text='Plot Curve', command=curve_plot)
 curve_plot_button.place(x=400, y=5)
 
 
-#def get_ids():
-#    result_table = Simbad.query_objectids(obj_name.get())
-#    print(result_table)
-
-
-#get_ids
 root.mainloop()
