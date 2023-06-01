@@ -16,7 +16,6 @@ root.resizable(True, False)
 
 screen_x = root.winfo_screenwidth()
 screen_y = root.winfo_screenheight()
-print(screen_x, screen_y)
 
 global window
 window = tk.Canvas(master=root, width=screen_x-558, height=screen_y-50, bg='white')
@@ -119,7 +118,9 @@ def curve_plot():
     figx = (screen_x-558)/100
     figy = (figx * 0.5625)
     fig = plt.Figure(figsize=(figx, figy), dpi = 100)
-    fig.add_subplot(111).plot(x, y, "ro")
+    #fig.add_subplot(111).plot(x, y, "ro")
+    fig.add_subplot(111).plot(x, y, color='blue', marker='o', linestyle='dashed',
+     linewidth=1, markersize=4)
     canvas = FigureCanvasTkAgg(fig, master=window)
     canvas.draw()
     canvas.get_tk_widget().pack()
