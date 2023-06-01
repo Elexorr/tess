@@ -37,28 +37,33 @@ obj_name_entered = ttk.Entry(frame1, width=20, textvariable=obj_name)
 obj_name_entered.place(x=65, y=8)
 
 author_label = tk.Label(master=frame1, font=('Helvetica', 10), text='Author:', bg='grey')
-author_label.place(x=5, y=35)
+author_label.place(x=5, y=36)
 author_name = tk.StringVar()
 
 global found_authors
 found_authors = []
 author_selection = ttk.Combobox(frame1, value=found_authors)
-author_selection.place(x=65, y=35)
+author_selection.place(x=65, y=36)
 
 exptime_label = tk.Label(master=frame1, font=('Helvetica', 10), text='Exptime:', bg='grey')
-exptime_label.place(x=5, y=62)
+exptime_label.place(x=5, y=64)
 exptime = tk.IntVar()
 
 global found_exptimes
 found_exptimes = []
 exptime_selection = ttk.Combobox(frame1, value=found_exptimes)
-exptime_selection.place(x=65, y=62)
+exptime_selection.place(x=65, y=64)
 
 sector_label = tk.Label(master=frame1, font=('Helvetica', 10), text='#:', bg='grey')
-sector_label.place(x=270, y=35)
+sector_label.place(x=320, y=8)
 sector_num = tk.IntVar()
-sector_num_entered = ttk.Entry(frame1, width=3, textvariable=sector_num)
-sector_num_entered.place(x=300, y=35)
+#sector_num_entered = ttk.Entry(frame1, width=3, textvariable=sector_num)
+#sector_num_entered.place(x=340, y=8)
+
+global found_sectors
+found_sectors = []
+sector_num = ttk.Combobox(frame1, value=found_sectors, width = 3)
+sector_num.place(x=340, y=8)
 
 
 def basic_search():
@@ -77,8 +82,8 @@ def basic_search():
     T.see(tk.END)
 
 
-basic_search_button = ttk.Button(frame1, text='Basic Search', command=basic_search)
-basic_search_button.place(x=205, y=5)
+basic_search_button = ttk.Button(frame1, text='  Basic Search  ', command=basic_search)
+basic_search_button.place(x=220, y=5)
 
 
 def refined_search():
@@ -86,21 +91,29 @@ def refined_search():
     T.insert(INSERT, '\n')
     T.insert(INSERT, search_lcf_refined)
     T.see(tk.END)
+    global found_sectors
+    found_sectors = len(search_lcf_refined)
+    nums = []
+    for i in range (0, found_sectors):
+        nums.append(i)
+    global sector_num
+    sector_num = ttk.Combobox(frame1, value=nums, width=3)
+    sector_num.place(x=340, y=8)
     if len(search_lcf_refined.table) != 0:
         global lcf
         lcf = search_lcf_refined.download_all()
 
 
 refined_search_button = ttk.Button(frame1, text='Refined Search', command=refined_search)
-refined_search_button.place(x=300, y=5)
+refined_search_button.place(x=220, y=35)
 
 
 def curve_plot():
     global window
     window = tk.Canvas(master=root, width=screen_x - 558, height=screen_y - 50, bg='white')
     window.grid(row=0, column=1, sticky='N')
-    x = lcf[sector_num.get()].time.value
-    y = lcf[sector_num.get()].flux
+    x = lcf[int(sector_num.get())].time.value
+    y = lcf[int(sector_num.get())].flux
     figx = (screen_x-558)/100
     figy = (figx * 0.5625)
     fig = plt.Figure(figsize=(figx, figy), dpi = 100)
