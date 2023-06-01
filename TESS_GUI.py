@@ -87,7 +87,7 @@ basic_search_button.place(x=220, y=5)
 
 
 def refined_search():
-    search_lcf_refined = lk.search_lightcurve(obj_name.get(), author=str(author_selection.get()), exptime=exptime_selection.get())
+    search_lcf_refined = lk.search_lightcurve(obj_name.get(), author=str(author_selection.get()), exptime=int(exptime_selection.get()))
     T.insert(INSERT, '\n')
     T.insert(INSERT, search_lcf_refined)
     T.see(tk.END)
