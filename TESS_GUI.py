@@ -57,8 +57,7 @@ exptime_selection.place(x=65, y=64)
 sector_label = tk.Label(master=frame1, font=('Helvetica', 10), text='#:', bg='grey')
 sector_label.place(x=320, y=8)
 sector_num = tk.IntVar()
-#sector_num_entered = ttk.Entry(frame1, width=3, textvariable=sector_num)
-#sector_num_entered.place(x=340, y=8)
+
 
 global found_sectors
 found_sectors = []
@@ -73,11 +72,13 @@ def basic_search():
     found_authors = aux.find_authors(search_lcf.author)
     global author_selection
     author_selection = ttk.Combobox(frame1, value=found_authors)
-    author_selection.place(x=65, y=35)
+    author_selection.insert(0, 'SPOC')
+    author_selection.place(x=65, y=36)
     found_exptimes = aux.find_exptimes(search_lcf.exptime)
     global exptime_selection
     exptime_selection = ttk.Combobox(frame1, value=found_exptimes)
-    exptime_selection.place(x=65, y=62)
+    exptime_selection.insert(0, 120)
+    exptime_selection.place(x=65, y=64)
     #print(search_lcf.exptime[0])
     T.see(tk.END)
 
@@ -98,6 +99,7 @@ def refined_search():
         nums.append(i)
     global sector_num
     sector_num = ttk.Combobox(frame1, value=nums, width=3)
+    sector_num.insert(0, 0)
     sector_num.place(x=340, y=8)
     if len(search_lcf_refined.table) != 0:
         global lcf
