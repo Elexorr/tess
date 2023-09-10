@@ -9,6 +9,7 @@ from astroquery.simbad import Simbad
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.backends.backend_tkagg import NavigationToolbar2Tk
 import auxiliary as aux
+from astroquery.mast import Catalogs
 import csv
 
 root = tk.Tk()
@@ -66,8 +67,19 @@ sector_num.place(x=340, y=8)
 
 with open('kepler.csv', newline='') as csvfile:
     reader = csv.DictReader(csvfile)
+    num = 0
     for row in reader:
-        print(row['#KIC'], row['period'], row['bjd0'])
+        num = num + 1
+        target_name = "KIC "+row['#KIC']
+        search_radius_deg = 0.001
+        catalogTIC = Catalogs.query_object(target_name, radius=search_radius_deg, catalog="TIC")
+        where_closest = np.argmin(catalogTIC['dstArcSec'])
+        # print(catalogTIC['ID'][where_closest])
+        # print("Closest TIC ID to %s: TIC %s, separation of %f arcsec. and a TESS mag. of %f" %
+        #       (target_name, catalogTIC['ID'][where_closest], catalogTIC['dstArcSec'][where_closest],
+        #        catalogTIC['Tmag'][where_closest]))
+        print(num, row['#KIC'], catalogTIC['ID'][where_closest], row['period'], row['bjd0'])
+
         #print(row['KIC'], row['period'])
 
 def basic_search():
