@@ -9,6 +9,7 @@ from astroquery.simbad import Simbad
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.backends.backend_tkagg import NavigationToolbar2Tk
 import auxiliary as aux
+import csv
 
 root = tk.Tk()
 root.title('TESS project')
@@ -63,6 +64,11 @@ found_sectors = []
 sector_num = ttk.Combobox(frame1, value=found_sectors, width = 3)
 sector_num.place(x=340, y=8)
 
+with open('kepler.csv', newline='') as csvfile:
+    reader = csv.DictReader(csvfile)
+    for row in reader:
+        print(row['#KIC'], row['period'], row['bjd0'])
+        #print(row['KIC'], row['period'])
 
 def basic_search():
     search_lcf = lk.search_lightcurve(obj_name.get())
@@ -128,6 +134,13 @@ def curve_plot():
     toolbar.update()
     canvas._tkcanvas.pack()
     global plott
+
+
+# def kepler():
+#     with open('kepler.csv', newline='') as csvfile:
+#         reader = csv.DictReader(csvfile)
+#         for row in reader:
+#             print(row['KIC'], row['period'])
 
 
 curve_plot_button = ttk.Button(frame1, text='Plot Curve', command=curve_plot)
