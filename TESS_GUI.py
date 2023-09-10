@@ -68,18 +68,24 @@ sector_num.place(x=340, y=8)
 with open('kepler.csv', newline='') as csvfile:
     reader = csv.DictReader(csvfile)
     num = 0
+    exc = 0
     for row in reader:
         num = num + 1
         target_name = "KIC "+row['#KIC']
         search_radius_deg = 0.001
         catalogTIC = Catalogs.query_object(target_name, radius=search_radius_deg, catalog="TIC")
-        where_closest = np.argmin(catalogTIC['dstArcSec'])
+        try:
+            where_closest = np.argmin(catalogTIC['dstArcSec'])
+        except:
+            print(num, row['#KIC'], 'no TIC', row['period'], row['bjd0'])
+            exc = exc + 1
         # print(catalogTIC['ID'][where_closest])
         # print("Closest TIC ID to %s: TIC %s, separation of %f arcsec. and a TESS mag. of %f" %
         #       (target_name, catalogTIC['ID'][where_closest], catalogTIC['dstArcSec'][where_closest],
         #        catalogTIC['Tmag'][where_closest]))
-        print(num, row['#KIC'], catalogTIC['ID'][where_closest], row['period'], row['bjd0'])
-
+        else:
+            print(num, row['#KIC'], catalogTIC['ID'][where_closest], row['period'], row['bjd0'])
+    print(exc)
         #print(row['KIC'], row['period'])
 
 def basic_search():

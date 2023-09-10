@@ -1,8 +1,8 @@
 from astroquery.mast import Catalogs
 import numpy as np
 
-target_name = "KIC 10417986"
-search_radius_deg = 0.005
+target_name = "KIC 2970804"
+search_radius_deg = 0.001
 
 # Query the TESS Input Catalog centered on HD 209458 with a 0.2 degree radius.
 catalogTIC = Catalogs.query_object(target_name, radius=search_radius_deg, catalog="TIC")
@@ -16,11 +16,14 @@ print("Number of TIC objects within %f deg of %s: %u" % (search_radius_deg, targ
 # What columns are available from the TIC?
 # print(catalogTIC.columns)
 
-where_closest = np.argmin(catalogTIC['dstArcSec'])
-
-print("Closest TIC ID to %s: TIC %s, separation of %f arcsec. and a TESS mag. of %f"%
-      (target_name, catalogTIC['ID'][where_closest], catalogTIC['dstArcSec'][where_closest],
-      catalogTIC['Tmag'][where_closest]))
+try:
+    where_closest = np.argmin(catalogTIC['dstArcSec'])
+except:
+    print('TIC not found.')
+else:
+    print("Closest TIC ID to %s: TIC %s, separation of %f arcsec. and a TESS mag. of %f"%
+        (target_name, catalogTIC['ID'][where_closest], catalogTIC['dstArcSec'][where_closest],
+        catalogTIC['Tmag'][where_closest]))
 
 # catalogTIC = Catalogs.query_object(target_name, catalog="TIC")
 #
