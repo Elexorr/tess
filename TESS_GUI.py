@@ -26,6 +26,7 @@ frame1 = tk.Frame(master=root, width=558, height=screen_y-50, bg='grey')
 frame1.grid(row=0, column=0, sticky='N')
 # v=Scrollbar(root, orient='vertical')
 # v.pack(side=RIGHT, fill='y')
+# global T
 T = Text(master=frame1, height=18, width=65, bg='Light grey', bd=3, padx=10)
 # T = Text(master=frame1, height=13, width=58, bg='Light grey', bd=3, padx=10, yscrollcommand=v.set)
 T.place(x=5, y=screen_y-385)
@@ -65,28 +66,9 @@ found_sectors = []
 sector_num = ttk.Combobox(frame1, value=found_sectors, width = 3)
 sector_num.place(x=340, y=8)
 
-with open('kepler.csv', newline='') as csvfile:
-    reader = csv.DictReader(csvfile)
-    num = 0
-    exc = 0
-    for row in reader:
-        num = num + 1
-        target_name = "KIC "+row['#KIC']
-        search_radius_deg = 0.001
-        catalogTIC = Catalogs.query_object(target_name, radius=search_radius_deg, catalog="TIC")
-        try:
-            where_closest = np.argmin(catalogTIC['dstArcSec'])
-        except:
-            print(num, row['#KIC'], 'no TIC', row['period'], row['bjd0'])
-            exc = exc + 1
-        # print(catalogTIC['ID'][where_closest])
-        # print("Closest TIC ID to %s: TIC %s, separation of %f arcsec. and a TESS mag. of %f" %
-        #       (target_name, catalogTIC['ID'][where_closest], catalogTIC['dstArcSec'][where_closest],
-        #        catalogTIC['Tmag'][where_closest]))
-        else:
-            print(num, row['#KIC'], catalogTIC['ID'][where_closest], row['period'], row['bjd0'])
-    print(exc)
-        #print(row['KIC'], row['period'])
+
+
+
 
 def basic_search():
     search_lcf = lk.search_lightcurve(obj_name.get())
@@ -154,11 +136,40 @@ def curve_plot():
     global plott
 
 
-# def kepler():
-#     with open('kepler.csv', newline='') as csvfile:
-#         reader = csv.DictReader(csvfile)
-#         for row in reader:
-#             print(row['KIC'], row['period'])
+def crossid():
+    T2 = Text(master=window, height=50, width=165, bg='Light grey', bd=3, padx=10)
+    T2.place(x=5, y=5)
+    with open('kepler.csv', newline='') as csvfile:
+        reader = csv.DictReader(csvfile)
+        num = 0
+        exc = 0
+        for row in reader:
+            num = num + 1
+            target_name = "KIC "+row['#KIC']
+            search_radius_deg = 0.001
+            catalogTIC = Catalogs.query_object(target_name, radius=search_radius_deg, catalog="TIC")
+            try:
+                where_closest = np.argmin(catalogTIC['dstArcSec'])
+            except:
+                print(num, row['#KIC'], 'no TIC', row['period'], row['bjd0'])
+                exc = exc + 1
+            # print(catalogTIC['ID'][where_closest])
+            # print("Closest TIC ID to %s: TIC %s, separation of %f arcsec. and a TESS mag. of %f" %
+            #       (target_name, catalogTIC['ID'][where_closest], catalogTIC['dstArcSec'][where_closest],
+            #        catalogTIC['Tmag'][where_closest]))
+            else:
+                # print(num, row['#KIC'], catalogTIC['ID'][where_closest], row['period'], row['bjd0'])
+                newrow = str(num) + ' ' + str(row['#KIC']) + ' ' + str(catalogTIC['ID'][where_closest]) + ' ' + str(row['period']) + ' ' + str(row['bjd0'])
+                T2.insert(INSERT, newrow)
+                T2.insert(INSERT, '\n')
+            T2.see(tk.END)
+            T2.update()
+        # print(exc)
+    #       #print(row['KIC'], row['period'])
+
+
+crossid_button = ttk.Button(frame1, text='  Crossidentification  ', command=crossid)
+crossid_button.place(x=8, y=100)
 
 
 curve_plot_button = ttk.Button(frame1, text='Plot Curve', command=curve_plot)
