@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import *
 from tkinter import ttk
+import os
 import lightkurve as lk
 import numpy as np
 import matplotlib.pyplot as plt
@@ -141,12 +142,29 @@ def crossid():
     T2.place(x=5, y=5)
     with open('kepler.csv', newline='') as csvfile:
         reader = csv.DictReader(csvfile)
+        os.mkdir(path='crossid')
         num = 0
         exc = 0
         for row in reader:
             num = num + 1
             target_name = "KIC "+row['#KIC']
+            os.mkdir(path='crossid/'+target_name)
             search_radius_deg = 0.001
+            search_result = lk.search_lightcurve(target_name, author='Kepler')
+            lc_collection = search_result.download_all()
+            # T2.insert(INSERT, lc_collection)
+            # T2.insert(INSERT, '\n')
+            i = 0
+            for lc in lc_collection:
+                filename = target_name+'_'+str(i)+'.csv'
+                # lc.to_csv(path_or_buf=target_name/target_name+'_'+str(i)+'.csv')
+                lc.to_csv(path_or_buf='crossid/'+target_name+'/'+filename)
+                i=i+1
+            # for lc in lc_collection:
+            #     lc.to_csv(path_or_buf='test')
+            # lc_collection = lc_collection.remove_nans().remove_outliers()
+            # lc_collection.to_fits(path=target_name, overwrite=True)
+
             catalogTIC = Catalogs.query_object(target_name, radius=search_radius_deg, catalog="TIC")
             try:
                 where_closest = np.argmin(catalogTIC['dstArcSec'])
@@ -158,10 +176,29 @@ def crossid():
             #       (target_name, catalogTIC['ID'][where_closest], catalogTIC['dstArcSec'][where_closest],
             #        catalogTIC['Tmag'][where_closest]))
             else:
+                tess_target_name = 'TIC '+str(catalogTIC['ID'][where_closest])
+                search_result = lk.search_lightcurve(tess_target_name)
+                lc_collection = search_result.download_all()
+                # T2.insert(INSERT, lc_collection)
+                # T2.insert(INSERT, '\n')
+                i = 0
+                for lc in lc_collection:
+                    filename = tess_target_name + '_' + str(i) + '.csv'
+                    # lc.to_csv(path_or_buf=target_name/target_name+'_'+str(i)+'.csv')
+                    lc.to_csv(path_or_buf='crossid/'+target_name + '/' + filename)
+                    i = i + 1
                 # print(num, row['#KIC'], catalogTIC['ID'][where_closest], row['period'], row['bjd0'])
-                newrow = str(num) + ' ' + str(row['#KIC']) + ' ' + str(catalogTIC['ID'][where_closest]) + ' ' + str(row['period']) + ' ' + str(row['bjd0'])
+                newrow = str(num) + ' ' + target_name + ' ' + tess_target_name + ' period:' + str(row['period']) + ' m0:' + str(row['bjd0'] + ' OK')
                 T2.insert(INSERT, newrow)
                 T2.insert(INSERT, '\n')
+                # T2.insert(INSERT, lc_collection)
+                # T2.insert(INSERT, '\n')
+                file = open('crossid/' + target_name + '/' + 'info.txt', "w")
+                file.write(target_name + '\n')
+                file.write(tess_target_name + '\n')
+                file.write('period:' + str(row['period']) + '\n')
+                file.write('m0:' + str(row['bjd0']) + '\n')
+                file.close()
             T2.see(tk.END)
             T2.update()
         # print(exc)
