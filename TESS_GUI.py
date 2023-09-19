@@ -12,6 +12,9 @@ from matplotlib.backends.backend_tkagg import NavigationToolbar2Tk
 import auxiliary as aux
 from astroquery.mast import Catalogs
 import csv
+import csvtodat
+import requests
+
 
 root = tk.Tk()
 root.title('TESS project')
@@ -138,66 +141,78 @@ def curve_plot():
 
 
 def crossid():
-    T2 = Text(master=window, height=50, width=165, bg='Light grey', bd=3, padx=10)
-    T2.place(x=5, y=5)
-    with open('kepler.csv', newline='') as csvfile:
-        reader = csv.DictReader(csvfile)
-        os.mkdir(path='crossid')
+    T2 = Text(master=window, height=50, width=165, bg='Light grey', bd=3, padx=10)  # Vytvori textovu plochu
+    T2.place(x=5, y=5)                                                              # pre vypisy
+
+    os.mkdir(path='crossid')  # Vytvori priecinok kde bude ukladat
+
+    with open('kepler.csv', newline='') as csvfile:         # Otvori a nacita
+        reader = csv.DictReader(csvfile)                    # zoznam z Keplera
         num = 0
         exc = 0
-        for row in reader:
-            num = num + 1
-            target_name = "KIC "+row['#KIC']
-            os.mkdir(path='crossid/'+target_name)
-            search_radius_deg = 0.001
-            search_result = lk.search_lightcurve(target_name, author='Kepler')
-            lc_collection = search_result.download_all()
+        for row in reader:                                  # Ide po KIC-kach riadok
+            num = num + 1                                   # po riadku, num sa pouziva vo vypise ako porad. cislo
+            target_name = "KIC "+row['#KIC']                # Vytvori podadresar
+            os.mkdir(path='crossid/'+target_name)           # nazvany ako cele KIC ID, kde bude ukladat data
+
+
+            if len(row['#KIC']) == 7:                                                                       #
+                url = "http://keplerebs.villanova.edu/includes/" + "0" + row['#KIC'] + ".00.lc.dtr.png"     # Vytvori url na stiahnutie
+            else:                                                                                           # obrazku dtr krivky
+                url = "http://keplerebs.villanova.edu/includes/" + row['#KIC'] + ".00.lc.dtr.png"           #
+
+            data = requests.get(url).content                    # Stiahne obrazok dtr krivky
+            save_path = 'crossid/'+target_name+'/'              #
+            file_name = "dtr.png"                               # Ulozi obrazok dtr krivky
+            completeName = os.path.join(save_path, file_name)   # do suboru dtr.png
+            f = open(completeName, 'wb')                        # v prislusnom podadresari
+            f.write(data)                                       #
+            f.close()                                           #
+
+            search_radius_deg = 0.001                                               # Nastavi radius vyhladavania TIC ku KIC
+            search_result = lk.search_lightcurve(target_name, author='Kepler')      # Stiahne vsetky dostupne Keplerove krivky
+            lc_collection = search_result.download_all()                            # pre danu KIC-ku
             # T2.insert(INSERT, lc_collection)
             # T2.insert(INSERT, '\n')
             i = 0
-            for lc in lc_collection:
-                filename = target_name+'_'+str(i)+'.csv'
-                # lc.to_csv(path_or_buf=target_name/target_name+'_'+str(i)+'.csv')
-                lc.to_csv(path_or_buf='crossid/'+target_name+'/'+filename)
-                i=i+1
-            # for lc in lc_collection:
-            #     lc.to_csv(path_or_buf='test')
-            # lc_collection = lc_collection.remove_nans().remove_outliers()
-            # lc_collection.to_fits(path=target_name, overwrite=True)
+            for lc in lc_collection:                                                # Ulozi do prislusneho
+                filename = target_name+'_'+str(i)+'.csv'                            # podadresara vsetky dostupne krivky
+                lc.to_csv(path_or_buf='crossid/'+target_name+'/'+filename)          # pre danu KIC, jednotlivo
+                # csvtodat.csv_to_dat('crossid/'+target_name+'/'+filename, input_del=",", output_path='crossid/'+target_name+'/'+target_name+'_'+str(i)+'.dat', output_del=" ", column_names=list())
+                i=i+1                                                               # po suboroch
 
-            catalogTIC = Catalogs.query_object(target_name, radius=search_radius_deg, catalog="TIC")
+            catalogTIC = Catalogs.query_object(target_name, radius=search_radius_deg, catalog="TIC") # Vyhlada vsetky TIC v okoli danej KIC
             try:
-                where_closest = np.argmin(catalogTIC['dstArcSec'])
+                where_closest = np.argmin(catalogTIC['dstArcSec'])                  # Skusi vyhladat najblizsiu TIC ku danej KIC
             except:
-                print(num, row['#KIC'], 'no TIC', row['period'], row['bjd0'])
-                exc = exc + 1
+                print(num, row['#KIC'], 'no TIC', row['period'], row['bjd0'])       # Ak nenajde dostatocne blizku TIC vypise neuspech
+                exc = exc + 1                                                       # Navysi pocet neuspesnych identifikacii o 1
             # print(catalogTIC['ID'][where_closest])
             # print("Closest TIC ID to %s: TIC %s, separation of %f arcsec. and a TESS mag. of %f" %
             #       (target_name, catalogTIC['ID'][where_closest], catalogTIC['dstArcSec'][where_closest],
             #        catalogTIC['Tmag'][where_closest]))
             else:
-                tess_target_name = 'TIC '+str(catalogTIC['ID'][where_closest])
-                search_result = lk.search_lightcurve(tess_target_name)
-                lc_collection = search_result.download_all()
-                # T2.insert(INSERT, lc_collection)
-                # T2.insert(INSERT, '\n')
+                tess_target_name = 'TIC '+str(catalogTIC['ID'][where_closest])      # Vytvori TIC ID uspesne najdenej TIC ku danej KIC
+                search_result = lk.search_lightcurve(tess_target_name)              # Stiahne vsetky dostupne TESS krivky
+                lc_collection = search_result.download_all()                        # pre danu TIC
+
                 i = 0
-                for lc in lc_collection:
-                    filename = tess_target_name + '_' + str(i) + '.csv'
-                    # lc.to_csv(path_or_buf=target_name/target_name+'_'+str(i)+'.csv')
-                    lc.to_csv(path_or_buf='crossid/'+target_name + '/' + filename)
+                for lc in lc_collection:                                                # Ulozi do prislusneho podadresara
+                    filename = tess_target_name + '_' + str(i) + '.csv'                 # vsetky dostupne krivky
+                    # lc.to_csv(path_or_buf=target_name/target_name+'_'+str(i)+'.csv')  # pre danu TIC, jednotlivo
+                    lc.to_csv(path_or_buf='crossid/'+target_name + '/' + filename)      # po suboroch
                     i = i + 1
-                # print(num, row['#KIC'], catalogTIC['ID'][where_closest], row['period'], row['bjd0'])
+
+                # Vytvori riadok ktory sa zapise do okna vypisov
                 newrow = str(num) + ' ' + target_name + ' ' + tess_target_name + ' period:' + str(row['period']) + ' m0:' + str(row['bjd0'] + ' OK')
-                T2.insert(INSERT, newrow)
-                T2.insert(INSERT, '\n')
-                # T2.insert(INSERT, lc_collection)
-                # T2.insert(INSERT, '\n')
-                file = open('crossid/' + target_name + '/' + 'info.txt', "w")
-                file.write(target_name + '\n')
-                file.write(tess_target_name + '\n')
-                file.write('period:' + str(row['period']) + '\n')
-                file.write('m0:' + str(row['bjd0']) + '\n')
+                T2.insert(INSERT, newrow)           # Vypise v okne uspesne
+                T2.insert(INSERT, '\n')       # stiahnutie a ulozenie dat
+
+                file = open('crossid/' + target_name + '/' + 'info.txt', "w")   # V prislusnom podadresari
+                file.write(target_name + '\n')                                  # vytvori subor info.txt
+                file.write(tess_target_name + '\n')                             # kde ulozi ziskane KIC, TIC
+                file.write('period:' + str(row['period']) + '\n')               # periodu aj m0 pre
+                file.write('m0:' + str(row['bjd0']) + '\n')                     # danu KIC
                 file.close()
             T2.see(tk.END)
             T2.update()
