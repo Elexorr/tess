@@ -135,8 +135,7 @@ def curve_plot():
     toolbar = NavigationToolbar2Tk(canvas, window)
     toolbar.update()
     canvas._tkcanvas.pack()
-    global plott
-    window.update()
+    # global plott
 
 
 kic_ids = []
@@ -173,8 +172,13 @@ def read_kic_id():
 kic_input_button = ttk.Button(frame1, text='Add KIC ID', command=read_kic_id)
 kic_input_button.place(x=220, y=148)
 
-
+global canvas
 def find_tic():
+    # window.destroy()
+    # if 'canvas' in globals():
+    #     canvas.destroy()
+    window = tk.Canvas(master=root, width=screen_x - 558, height=screen_y - 50, bg='white')
+    window.grid(row=0, column=1, sticky='N')
     kic_num = kic_id_input.get()
     kic_id = 'KIC '+ kic_num
     url = "http://keplerebs.villanova.edu/includes/" + kic_num + ".00.lc.pf.png"  #
