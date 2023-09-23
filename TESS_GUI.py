@@ -12,6 +12,7 @@ from matplotlib.backends.backend_tkagg import NavigationToolbar2Tk
 import auxiliary as aux
 from astroquery.mast import Catalogs
 import csv
+from PIL import Image,ImageTk
 import csvtodat
 import requests
 
@@ -69,9 +70,6 @@ global found_sectors
 found_sectors = []
 sector_num = ttk.Combobox(frame1, value=found_sectors, width = 3)
 sector_num.place(x=340, y=8)
-
-
-
 
 
 def basic_search():
@@ -138,6 +136,76 @@ def curve_plot():
     toolbar.update()
     canvas._tkcanvas.pack()
     global plott
+    window.update()
+
+
+kic_ids = []
+with open('kepler.csv', newline='') as csvfile:
+    rowz = csv.DictReader(csvfile)
+    for row in rowz:
+        kic_ids.append(row['#KIC'])
+    kic_ids = sorted(kic_ids)
+
+kic_label = tk.Label(master=frame1, font=('Helvetica', 10), text='KIC ID:', bg='grey')
+kic_label.place(x=5, y=150)
+kic_id_input = ttk.Combobox(frame1, value=kic_ids, width = 20)
+kic_id_input.place(x=65, y=150)
+
+
+def read_kic_id():
+    kic_num = kic_id_input.get()
+    kic_id = 'KIC '+ kic_num
+    obj_name_entered.delete(0, END)
+    obj_name_entered.insert(0, kic_id)
+    # url = "http://keplerebs.villanova.edu/includes/" + kic_num + ".00.lc.pf.png"  #
+    # data = requests.get(url).content  # Stiahne obrazok dtr krivky
+    # file_name = "temp.png"  # Ulozi obrazok dtr krivky
+    # f = open("temp.png", 'wb')  # v prislusnom podadresari
+    # f.write(data)  #
+    # f.close()  #
+    # kic_phased = Image.open('temp.png')
+    # kic_ph_resized = kic_phased.resize((400,300))
+    # img = ImageTk.PhotoImage(kic_ph_resized)
+    # window.create_image(100,100, image = img)
+    # window.mainloop()
+
+
+kic_input_button = ttk.Button(frame1, text='Add KIC ID', command=read_kic_id)
+kic_input_button.place(x=220, y=148)
+
+
+def find_tic():
+    kic_num = kic_id_input.get()
+    kic_id = 'KIC '+ kic_num
+    url = "http://keplerebs.villanova.edu/includes/" + kic_num + ".00.lc.pf.png"  #
+    data = requests.get(url).content  # Stiahne obrazok dtr krivky
+    file_name = "temp.png"  # Ulozi obrazok dtr krivky
+    f = open("temp.png", 'wb')  # v prislusnom podadresari
+    f.write(data)  #
+    f.close()  #
+    kic_phased = Image.open('temp.png')
+    kic_ph_resized = kic_phased.resize((240,180))
+    img = ImageTk.PhotoImage(kic_ph_resized)
+    search_radius_deg = 0.001
+    catalogTIC = Catalogs.query_object(kic_id, radius=search_radius_deg,
+                                       catalog="TIC")  # Vyhlada vsetky TIC v okoli danej KIC
+    try:
+        where_closest = np.argmin(catalogTIC['dstArcSec'])  # Skusi vyhladat najblizsiu TIC ku danej KIC
+    except:
+        tic_id = ''
+        obj_name_entered.delete(0, END)
+        obj_name_entered.insert(0, tic_id)
+    else:
+        tic_id = 'TIC ' + str(catalogTIC['ID'][where_closest])
+        obj_name_entered.delete(0, END)
+        obj_name_entered.insert(0, tic_id)
+    window.create_image(100, 900, image=img)
+    window.update()
+    window.mainloop()
+
+
+find_tic_button = ttk.Button(frame1, text='Find TIC ID', command=find_tic)
+find_tic_button.place(x=300, y=148)
 
 
 def crossid():
@@ -226,6 +294,10 @@ crossid_button.place(x=8, y=100)
 
 curve_plot_button = ttk.Button(frame1, text='Plot Curve', command=curve_plot)
 curve_plot_button.place(x=400, y=5)
+
+# kic_plot_button = ttk.Button(frame1, text='Plot Curve', command=curve_plot)
+# kic_plot_button.place(x=400, y=5)
+
 
 
 root.mainloop()
