@@ -95,6 +95,7 @@ basic_search_button.place(x=220, y=5)
 
 
 def refined_search():
+    global lcf
     search_lcf_refined = lk.search_lightcurve(obj_name.get(), author=str(author_selection.get()), exptime=int(exptime_selection.get()))
     T.insert(INSERT, '\n')
     T.insert(INSERT, search_lcf_refined)
@@ -135,7 +136,6 @@ def curve_plot():
     toolbar = NavigationToolbar2Tk(canvas, window)
     toolbar.update()
     canvas._tkcanvas.pack()
-    # global plott
 
 
 kic_ids = []
@@ -173,13 +173,30 @@ kic_input_button = ttk.Button(frame1, text='Add KIC ID', command=read_kic_id)
 kic_input_button.place(x=220, y=148)
 
 global canvas
+
 def find_tic():
+    global period
+    global t0
     # window.destroy()
     # if 'canvas' in globals():
     #     canvas.destroy()
     window = tk.Canvas(master=root, width=screen_x - 558, height=screen_y - 50, bg='white')
     window.grid(row=0, column=1, sticky='N')
     kic_num = kic_id_input.get()
+
+    with open('kepler.csv', newline='') as csvfile:
+        rowz = csv.DictReader(csvfile)
+        for row in rowz:
+            if kic_id_input.get() == row['#KIC']:
+                period = row['period']
+                t0 = row['bjd0']
+        print(period)
+        print(t0)
+        period = float(period)
+        t0 = float(t0)
+        print(period)
+        print(t0)
+
     kic_id = 'KIC '+ kic_num
     url = "http://keplerebs.villanova.edu/includes/" + kic_num + ".00.lc.pf.png"  #
     data = requests.get(url).content  # Stiahne obrazok dtr krivky
@@ -210,6 +227,32 @@ def find_tic():
 
 find_tic_button = ttk.Button(frame1, text='Find TIC ID', command=find_tic)
 find_tic_button.place(x=300, y=148)
+
+
+def plot_phased():
+    global window
+    window = tk.Canvas(master=root, width=screen_x - 558, height=screen_y - 50, bg='white')
+    window.grid(row=0, column=1, sticky='N')
+    folded_lcf = lcf[int(sector_num.get())].fold(period, t0)
+    print(folded_lcf)
+    x = folded_lcf.time.value
+    y = folded_lcf.flux
+    # x = folded_lcf[int(sector_num.get())].phase.value
+    # y = folded_lcf[int(sector_num.get())].flux
+    # x = lcf[int(sector_num.get())].time.value
+    # y = lcf[int(sector_num.get())].flux
+    figx = (screen_x-558)/100
+    figy = (figx * 0.5625)
+    fig = plt.Figure(figsize=(figx, figy), dpi = 100)
+    #fig.add_subplot(111).plot(x, y, "ro")
+    fig.add_subplot(111).plot(x, y, color='blue', marker='o', linestyle='dashed',
+     linewidth=1, markersize=4)
+    canvas = FigureCanvasTkAgg(fig, master=window)
+    canvas.draw()
+    canvas.get_tk_widget().pack()
+    toolbar = NavigationToolbar2Tk(canvas, window)
+    toolbar.update()
+    canvas._tkcanvas.pack()
 
 
 def crossid():
@@ -295,9 +338,11 @@ def crossid():
 crossid_button = ttk.Button(frame1, text='  Crossidentification  ', command=crossid)
 crossid_button.place(x=8, y=100)
 
-
 curve_plot_button = ttk.Button(frame1, text='Plot Curve', command=curve_plot)
 curve_plot_button.place(x=400, y=5)
+
+plot_phased_button = ttk.Button(frame1, text='Plot Phased', command=plot_phased)
+plot_phased_button.place(x=400, y=35)
 
 # kic_plot_button = ttk.Button(frame1, text='Plot Curve', command=curve_plot)
 # kic_plot_button.place(x=400, y=5)
