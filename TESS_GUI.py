@@ -19,6 +19,7 @@ import requests
 
 root = tk.Tk()
 root.title('TESS project')
+root.state('zoomed')
 root.resizable(True, False)
 
 screen_x = root.winfo_screenwidth()
@@ -175,6 +176,7 @@ kic_input_button.place(x=220, y=148)
 global canvas
 
 def find_tic():
+    global lcf
     global period
     global t0
     # window.destroy()
@@ -221,6 +223,9 @@ def find_tic():
         obj_name_entered.delete(0, END)
         obj_name_entered.insert(0, tic_id)
     window.create_image(100, 900, image=img)
+    window.create_text(270, 850, text = kic_id + '\n' + 'Period: ' + str(period) + '\n' + 'M0: '+ str(t0), font=('Times 10 bold'), justify='left')
+    # window.create_text(270, 870, text = 'Period: '+ str(period), font=('Times 10 bold'))
+    # window.create_text(270, 890, text= 'M0: '+ str(t0), font=('Times 10 bold'))
     window.update()
     window.mainloop()
 
@@ -234,7 +239,7 @@ def plot_phased():
     window = tk.Canvas(master=root, width=screen_x - 558, height=screen_y - 50, bg='white')
     window.grid(row=0, column=1, sticky='N')
     folded_lcf = lcf[int(sector_num.get())].fold(period, t0)
-    print(folded_lcf)
+    # print(folded_lcf)
     x = folded_lcf.time.value
     y = folded_lcf.flux
     # x = folded_lcf[int(sector_num.get())].phase.value
