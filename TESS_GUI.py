@@ -139,6 +139,10 @@ def curve_plot():
     canvas._tkcanvas.pack()
 
 
+kepler_label = tk.Label(master=frame1, font=('Helvetica', 10), text='Kepler Eclipsing Binary Catalog', bg='grey')
+kepler_label.place(x=5, y=125)
+
+
 kic_ids = []
 with open('kepler.csv', newline='') as csvfile:
     rowz = csv.DictReader(csvfile)
@@ -153,8 +157,24 @@ kic_id_input.place(x=65, y=150)
 
 
 def read_kic_id():
+    global lcf
+    global period
+    global t0
     kic_num = kic_id_input.get()
     kic_id = 'KIC '+ kic_num
+    with open('kepler.csv', newline='') as csvfile:
+        rowz = csv.DictReader(csvfile)
+        for row in rowz:
+            if kic_id_input.get() == row['#KIC']:
+                period = row['period']
+                t0 = row['bjd0']
+        print(period)
+        print(t0)
+        period = float(period)
+        t0 = float(t0)
+        print(period)
+        print(t0)
+
     obj_name_entered.delete(0, END)
     obj_name_entered.insert(0, kic_id)
     # url = "http://keplerebs.villanova.edu/includes/" + kic_num + ".00.lc.pf.png"  #
@@ -341,7 +361,7 @@ def crossid():
 
 
 crossid_button = ttk.Button(frame1, text='  Crossidentification  ', command=crossid)
-crossid_button.place(x=8, y=100)
+crossid_button.place(x=8, y=650)
 
 curve_plot_button = ttk.Button(frame1, text='Plot Curve', command=curve_plot)
 curve_plot_button.place(x=400, y=5)
