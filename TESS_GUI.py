@@ -15,6 +15,7 @@ import csv
 from PIL import Image,ImageTk
 import csvtodat
 import requests
+import pandas as pd
 
 
 root = tk.Tk()
@@ -125,6 +126,16 @@ def curve_plot():
     window.grid(row=0, column=1, sticky='N')
     x = lcf[int(sector_num.get())].time.value
     y = lcf[int(sector_num.get())].flux
+    # lcf.write()
+    lcf[int(sector_num.get())].to_csv(path_or_buf='lightcurve.csv', overwrite=True)
+    # df = pd.read_csv('lightcurve.csv', header=None, index_col=0)
+    # # print(df)
+    # content = str(df)
+    # print(content)
+    # print(content, file=open('lightcurve.txt', 'w'))
+    # savedlc = open('light_curve.txt', 'wb')
+    # savedlc.write(lcf[int(sector_num.get())])
+    # savedlc.close()
     figx = (screen_x-558)/100
     figy = (figx * 0.5625)
     fig = plt.Figure(figsize=(figx, figy), dpi = 100)
