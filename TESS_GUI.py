@@ -133,8 +133,10 @@ def curve_plot():
     txtcurve = str(obj_name.get()) + '_tess.txt'
     file = open(txtcurve, 'w')
     for row in lcf[int(sector_num.get())]:
-        line = str(row['time']) + ' ' + str(row['flux']) + ' ' + str(row['flux_err']) + '\n'
-        print(line)
+        mag = -2.5 * float(row['flux']) + 20
+        line = str(row['time']) + ' ' + str(mag) + ' ' + str(row['flux_err']) + '\n'
+        # line = str(row['time']) + ' ' + str(row['flux']) + ' ' + str(row['flux_err']) + '\n'
+        # print(line)
         file.write(line)
     file.close()
 
