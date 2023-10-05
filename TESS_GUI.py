@@ -121,6 +121,7 @@ refined_search_button.place(x=220, y=35)
 
 
 def curve_plot():
+    global lcf
     global window
     window = tk.Canvas(master=root, width=screen_x - 558, height=screen_y - 50, bg='white')
     window.grid(row=0, column=1, sticky='N')
@@ -128,6 +129,20 @@ def curve_plot():
     y = lcf[int(sector_num.get())].flux
     # lcf.write()
     lcf[int(sector_num.get())].to_csv(path_or_buf='lightcurve.csv', overwrite=True)
+
+    txtcurve = str(obj_name.get()) + '_tess.txt'
+    file = open(txtcurve, 'w')
+    for row in lcf[int(sector_num.get())]:
+        line = str(row['time']) + ' ' + str(row['flux']) + ' ' + str(row['flux_err']) + '\n'
+        print(line)
+        file.write(line)
+    file.close()
+
+    # with open('lightcurve.csv', newline='') as csvfile:
+    #     rowz = csv.DictReader(csvfile)
+    #     for row in rowz:
+    #         line = str(row['time']) +  ' ' + str(row['flux']) + ' ' + str(row['flux_err'])
+    #         print(line)
     # df = pd.read_csv('lightcurve.csv', header=None, index_col=0)
     # # print(df)
     # content = str(df)
