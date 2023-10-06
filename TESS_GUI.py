@@ -121,24 +121,40 @@ refined_search_button.place(x=220, y=35)
 
 
 def curve_plot():
+
     global lcf
     global window
     window = tk.Canvas(master=root, width=screen_x - 558, height=screen_y - 50, bg='white')
     window.grid(row=0, column=1, sticky='N')
+
     x = lcf[int(sector_num.get())].time.value
     y = lcf[int(sector_num.get())].flux
-    # lcf.write()
+
+    xx = []
+    yy = []
+
+    if JDstart_entered.get() != '':
+        JDstart = float(JDstart_entered.get())
+        JDend = float(JDend_entered.get())
+        for i in range (0, len(x)):
+            if JDstart < x[i] and  x[i] < JDend:
+                xx.append(x[i])
+                yy.append(y[i])
+    else:
+        xx = lcf[int(sector_num.get())].time.value
+        yy = lcf[int(sector_num.get())].flux
+
     lcf[int(sector_num.get())].to_csv(path_or_buf='lightcurve.csv', overwrite=True)
 
-    txtcurve = str(obj_name.get()) + '_tess.txt'
-    file = open(txtcurve, 'w')
-    for row in lcf[int(sector_num.get())]:
-        mag = -2.5 * float(row['flux']) + 20
-        line = str(row['time']) + ' ' + str(mag) + ' ' + str(row['flux_err']) + '\n'
-        # line = str(row['time']) + ' ' + str(row['flux']) + ' ' + str(row['flux_err']) + '\n'
-        # print(line)
-        file.write(line)
-    file.close()
+    # txtcurve = str(obj_name.get()) + '_tess.txt'
+    # file = open(txtcurve, 'w')
+    # for row in lcf[int(sector_num.get())]:
+    #     mag = -2.5 * float(row['flux']) + 20
+    #     line = str(row['time']) + ' ' + str(mag) + ' ' + str(row['flux_err']) + '\n'
+    #     # line = str(row['time']) + ' ' + str(row['flux']) + ' ' + str(row['flux_err']) + '\n'
+    #     # print(line)
+    #     file.write(line)
+    # file.close()
 
     # with open('lightcurve.csv', newline='') as csvfile:
     #     rowz = csv.DictReader(csvfile)
@@ -157,7 +173,7 @@ def curve_plot():
     figy = (figx * 0.5625)
     fig = plt.Figure(figsize=(figx, figy), dpi = 100)
     #fig.add_subplot(111).plot(x, y, "ro")
-    fig.add_subplot(111).plot(x, y, color='blue', marker='o', linestyle='dashed',
+    fig.add_subplot(111).plot(xx, yy, color='blue', marker='o', linestyle='dashed',
      linewidth=1, markersize=4)
     canvas = FigureCanvasTkAgg(fig, master=window)
     canvas.draw()
@@ -165,6 +181,39 @@ def curve_plot():
     toolbar = NavigationToolbar2Tk(canvas, window)
     toolbar.update()
     canvas._tkcanvas.pack()
+
+
+
+JDstart_entered = ttk.Entry(frame1, width=10)
+JDstart_entered.place(x=320, y=65)
+JDend_entered = ttk.Entry(frame1, width=10)
+JDend_entered.place(x=320, y=90)
+
+
+def save_curve():
+    if JDstart_entered.get() != '':
+        JDstart = float(JDstart_entered.get())
+        JDend = float(JDend_entered.get())
+    else:
+        JDstart = 0
+        JDend = 1000000
+    global lcf
+    txtcurve = str(obj_name.get()) + '_tess.txt'
+    file = open(txtcurve, 'w')
+    for row in lcf[int(sector_num.get())]:
+        if JDstart < float(str(row['time'])) < JDend:
+            JDtime = row['time'] + 2457000
+            mag = -2.5 * float(row['flux']) + 20
+            line = str(JDtime) + ' ' + str(mag) + ' ' + str(row['flux_err']) + '\n'
+            # line = str(row['time']) + ' ' + str(mag) + ' ' + str(row['flux_err']) + '\n'
+            # line = str(row['time']) + ' ' + str(row['flux']) + ' ' + str(row['flux_err']) + '\n'
+            # print(line)
+            file.write(line)
+    file.close()
+
+
+save_curve_button = ttk.Button(frame1, text='Save Curve', command=save_curve)
+save_curve_button.place(x=400, y=95)
 
 
 kepler_label = tk.Label(master=frame1, font=('Helvetica', 10), text='Kepler Eclipsing Binary Catalog', bg='grey')
