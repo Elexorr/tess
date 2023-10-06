@@ -132,6 +132,7 @@ def curve_plot():
 
     xx = []
     yy = []
+    zz = []
 
     if JDstart_entered.get() != '':
         JDstart = float(JDstart_entered.get())
@@ -143,6 +144,11 @@ def curve_plot():
     else:
         xx = lcf[int(sector_num.get())].time.value
         yy = lcf[int(sector_num.get())].flux
+
+    # EXPERIMENTAL ROWS
+    for i in range (0,len(yy)):
+        zz.append(yy[i]+0.1)
+    # EXPERIMENTAL ROWS
 
     lcf[int(sector_num.get())].to_csv(path_or_buf='lightcurve.csv', overwrite=True)
 
@@ -173,8 +179,17 @@ def curve_plot():
     figy = (figx * 0.5625)
     fig = plt.Figure(figsize=(figx, figy), dpi = 100)
     #fig.add_subplot(111).plot(x, y, "ro")
-    fig.add_subplot(111).plot(xx, yy, color='blue', marker='o', linestyle='dashed',
+
+    # EXPERIMENTAL ROWS
+    fig.add_subplot(111).plot(xx, yy, 'b', xx, zz, 'r', marker='o', linestyle='dashed',
      linewidth=1, markersize=4)
+    # EXPERIMENTAL ROWS
+
+    # BACKUP ROWS
+    # fig.add_subplot(111).plot(xx, yy, color='blue', marker='o', linestyle='dashed',
+    #  linewidth=1, markersize=4)
+    # BACKUP ROWS
+
     canvas = FigureCanvasTkAgg(fig, master=window)
     canvas.draw()
     canvas.get_tk_widget().pack()
@@ -183,9 +198,12 @@ def curve_plot():
     canvas._tkcanvas.pack()
 
 
-
+JDstart_label = tk.Label(master=frame1, font=('Helvetica', 10), text='JD start:', bg='grey')
+JDstart_label.place(x=260, y=65)
 JDstart_entered = ttk.Entry(frame1, width=10)
 JDstart_entered.place(x=320, y=65)
+JDend_label = tk.Label(master=frame1, font=('Helvetica', 10), text='JD end:', bg='grey')
+JDend_label.place(x=260, y=90)
 JDend_entered = ttk.Entry(frame1, width=10)
 JDend_entered.place(x=320, y=90)
 
@@ -213,7 +231,7 @@ def save_curve():
 
 
 save_curve_button = ttk.Button(frame1, text='Save Curve', command=save_curve)
-save_curve_button.place(x=400, y=95)
+save_curve_button.place(x=400, y=87)
 
 
 kepler_label = tk.Label(master=frame1, font=('Helvetica', 10), text='Kepler Eclipsing Binary Catalog', bg='grey')
