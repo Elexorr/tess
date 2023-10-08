@@ -78,7 +78,7 @@ sector_num.place(x=340, y=8)
 def basic_search():
     # JDstart_entered.delete(0, END)
     # JDend_entered.delete(0, END)
-    clear_JD()
+    clear_JD() # Vymaze policka na ohranicovanie krivky
     search_lcf = lk.search_lightcurve(obj_name.get())
     T.insert(INSERT, '\n')
     T.insert(INSERT, search_lcf)
