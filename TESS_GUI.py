@@ -76,8 +76,6 @@ sector_num.place(x=340, y=8)
 
 
 def basic_search():
-    # JDstart_entered.delete(0, END)
-    # JDend_entered.delete(0, END)
     clear_JD() # Vymaze policka na ohranicovanie krivky
     search_lcf = lk.search_lightcurve(obj_name.get())
     T.insert(INSERT, '\n')
@@ -92,7 +90,6 @@ def basic_search():
     exptime_selection = ttk.Combobox(frame1, value=found_exptimes)
     exptime_selection.insert(0, 120)
     exptime_selection.place(x=65, y=64)
-    #print(search_lcf.exptime[0])
     T.see(tk.END)
 
 
@@ -123,9 +120,12 @@ def refined_search():
 refined_search_button = ttk.Button(frame1, text='Refined Search', command=refined_search)
 refined_search_button.place(x=220, y=35)
 
+
 global fig
 global canvas
 global ax
+
+
 def curve_plot():
     global fig
     global lcf
@@ -135,6 +135,8 @@ def curve_plot():
 
     window = tk.Canvas(master=root, width=screen_x - 558, height=screen_y - 50, bg='white')
     window.grid(row=0, column=1, sticky='N')
+
+    print(lcf[int(sector_num.get())])
 
     x = lcf[int(sector_num.get())].time.value
     y = lcf[int(sector_num.get())].flux.value
