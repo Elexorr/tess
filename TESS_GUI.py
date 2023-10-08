@@ -5,6 +5,7 @@ import os
 import lightkurve as lk
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.lines as lines
 from astroquery.simbad import Simbad
 # from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -119,11 +120,16 @@ def refined_search():
 refined_search_button = ttk.Button(frame1, text='Refined Search', command=refined_search)
 refined_search_button.place(x=220, y=35)
 
-
+global fig
+global canvas
+global ax
 def curve_plot():
-
+    global fig
     global lcf
     global window
+    global canvas
+    global ax
+
     window = tk.Canvas(master=root, width=screen_x - 558, height=screen_y - 50, bg='white')
     window.grid(row=0, column=1, sticky='N')
 
@@ -181,8 +187,11 @@ def curve_plot():
     #fig.add_subplot(111).plot(x, y, "ro")
 
     # EXPERIMENTAL ROWS
-    fig.add_subplot(111).plot(xx, yy, 'b', xx, zz, 'r', marker='o', linestyle='dashed',
+    ax = fig.add_subplot(111)
+    ax.plot(xx, yy, 'b', xx, zz, 'r', marker='o', linestyle='dashed',
      linewidth=1, markersize=4)
+    # ax = fig.add_subplot(111).plot(xx, yy, 'b', xx, zz, 'r', marker='o', linestyle='dashed',
+    #  linewidth=1, markersize=4)
     # EXPERIMENTAL ROWS
 
     # BACKUP ROWS
@@ -195,6 +204,7 @@ def curve_plot():
     canvas.get_tk_widget().pack()
     toolbar = NavigationToolbar2Tk(canvas, window)
     toolbar.update()
+    cid = fig.canvas.mpl_connect('button_press_event', onclick)
     canvas._tkcanvas.pack()
 
 
@@ -206,6 +216,42 @@ JDend_label = tk.Label(master=frame1, font=('Helvetica', 10), text='JD end:', bg
 JDend_label.place(x=260, y=90)
 JDend_entered = ttk.Entry(frame1, width=10)
 JDend_entered.place(x=320, y=90)
+
+
+targetJD = 'start'
+global vlines
+vlines = 0
+def onclick(event):
+    global vlines
+    global ax
+    global targetJD
+    global vline1
+    global vline2
+    ix, iy = float(event.xdata), float(event.ydata)
+    print(f'x = {ix}, y = {iy}')
+
+    if targetJD == 'start':
+        JDstart_entered.delete(0, END)
+        JDstart_entered.insert(0, str(round(ix,2)))
+        targetJD = 'end'
+    elif targetJD == 'end':
+        JDend_entered.delete(0, END)
+        JDend_entered.insert(0, str(round(ix,2)))
+        targetJD = 'start'
+    if vlines == 0:
+        vline1 = ax.axvline(x=ix, color='r', linestyle='--')
+        vlines = 1
+    elif vlines == 1:
+        vline2 = ax.axvline(x=ix, color='r', linestyle='--')
+        vlines = 2
+    elif vlines == 2:
+        if 'vline1' in globals():
+            vline1.remove()
+        if 'vline2' in globals():
+            vline2.remove()
+        vline1 = ax.axvline(x=ix, color='r', linestyle='--')
+        vlines = 0
+    fig.canvas.draw()
 
 
 def save_curve():
