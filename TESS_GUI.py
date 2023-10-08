@@ -76,6 +76,9 @@ sector_num.place(x=340, y=8)
 
 
 def basic_search():
+    # JDstart_entered.delete(0, END)
+    # JDend_entered.delete(0, END)
+    clear_JD()
     search_lcf = lk.search_lightcurve(obj_name.get())
     T.insert(INSERT, '\n')
     T.insert(INSERT, search_lcf)
@@ -134,7 +137,7 @@ def curve_plot():
     window.grid(row=0, column=1, sticky='N')
 
     x = lcf[int(sector_num.get())].time.value
-    y = lcf[int(sector_num.get())].flux
+    y = lcf[int(sector_num.get())].flux.value
 
     xx = []
     yy = []
@@ -145,15 +148,18 @@ def curve_plot():
         JDend = float(JDend_entered.get())
         for i in range (0, len(x)):
             if JDstart < x[i] and  x[i] < JDend:
-                xx.append(x[i])
-                yy.append(y[i])
+                # print(x[i],y[i])
+                # print(float(x[i]))
+                xx.append(float(x[i]))
+                # print(float(y[i]))
+                yy.append(float(y[i]))
     else:
         xx = lcf[int(sector_num.get())].time.value
         yy = lcf[int(sector_num.get())].flux
 
     # EXPERIMENTAL ROWS
-    for i in range (0,len(yy)):
-        zz.append(yy[i]+0.1)
+    # for i in range (0,len(yy)):
+    #     zz.append(yy[i]+0.1)
     # EXPERIMENTAL ROWS
 
     lcf[int(sector_num.get())].to_csv(path_or_buf='lightcurve.csv', overwrite=True)
@@ -186,14 +192,13 @@ def curve_plot():
     fig = plt.Figure(figsize=(figx, figy), dpi = 100)
     #fig.add_subplot(111).plot(x, y, "ro")
 
-    # EXPERIMENTAL ROWS
+
     ax = fig.add_subplot(111)
-    ax.plot(xx, yy, 'b', xx, zz, 'r', marker='o', linestyle='dashed',
-     linewidth=1, markersize=4)
+    ax.plot(xx, yy, 'b', marker='o', linestyle='dashed', linewidth=1, markersize=4)
+    # EXPERIMENTAL ROWS TO ADD FIT CURVE / ked bude treba
     # ax = fig.add_subplot(111).plot(xx, yy, 'b', xx, zz, 'r', marker='o', linestyle='dashed',
     #  linewidth=1, markersize=4)
-    # EXPERIMENTAL ROWS
-
+    # EXPERIMENTAL ROWS TO ADD FIT CURVE / ked bude traba
     # BACKUP ROWS
     # fig.add_subplot(111).plot(xx, yy, color='blue', marker='o', linestyle='dashed',
     #  linewidth=1, markersize=4)
@@ -218,18 +223,27 @@ JDend_entered = ttk.Entry(frame1, width=10)
 JDend_entered.place(x=320, y=90)
 
 
+def clear_JD():
+    JDstart_entered.delete(0, END)
+    JDend_entered.delete(0, END)
+
+
+clear_JD_button = ttk.Button(frame1, text='CLR', width = 4, command=clear_JD)
+clear_JD_button.place(x=220, y=75)
+
 targetJD = 'start'
-global vlines
+# global vlines
 vlines = 0
+
+
 def onclick(event):
     global vlines
-    global ax
+    # global ax
     global targetJD
     global vline1
     global vline2
     ix, iy = float(event.xdata), float(event.ydata)
-    print(f'x = {ix}, y = {iy}')
-
+    # print(f'x = {ix}, y = {iy}')
     if targetJD == 'start':
         JDstart_entered.delete(0, END)
         JDstart_entered.insert(0, str(round(ix,2)))
@@ -245,12 +259,10 @@ def onclick(event):
         vline2 = ax.axvline(x=ix, color='r', linestyle='--')
         vlines = 2
     elif vlines == 2:
-        if 'vline1' in globals():
-            vline1.remove()
-        if 'vline2' in globals():
-            vline2.remove()
+        vline1.remove()
+        vline2.remove()
         vline1 = ax.axvline(x=ix, color='r', linestyle='--')
-        vlines = 0
+        vlines = 1
     fig.canvas.draw()
 
 
