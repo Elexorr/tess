@@ -370,11 +370,18 @@ def save_curve():
     global lcf
     txtcurve = str(obj_name.get()) + '_tess.txt'
     file = open(txtcurve, 'w')
+    print(lcf[int(sector_num.get())])
+
+    # fluxcoef = int(exptime_selection.get())/1800
+
     for row in lcf[int(sector_num.get())]:
-        if JDstart < float(str(row['time'])) < JDend:
+        if JDstart < float(str(row['time'].value)) < JDend:
+
             JDtime = row['time'] + 2457000
-            mag = -2.5 * float(row['flux.value']) + 20
-            line = str(JDtime) + ' ' + str(mag) + ' ' + str(row['flux_err']) + '\n'
+            mag = -2.5 * float(row['flux'].value) + 20
+            # mag = -2.5 * (float(row['flux'].value)*fluxcoef) + 20
+            # line = str(JDtime) + ' ' + str(row['flux'].value) + ' ' + str(row['flux_err'].value) + '\n'
+            line = str(JDtime) + ' ' + str(mag) + ' ' + str(row['flux_err'].value) + '\n'
             # line = str(row['time']) + ' ' + str(mag) + ' ' + str(row['flux_err']) + '\n'
             # line = str(row['time']) + ' ' + str(row['flux']) + ' ' + str(row['flux_err']) + '\n'
             # print(line)
