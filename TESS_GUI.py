@@ -309,8 +309,6 @@ def fitprocessing():
     ax.plot(xx, yy, 'b', marker='o', linestyle='dashed', linewidth=1, markersize=4)
     ax.plot(fxx, fitt, 'r', linestyle='-', linewidth=2, markersize=4)
     # ax.plot(fxx, fitt, 'r', xx, yy, 'b',  marker='o', linestyle='dashed', linewidth=1, markersize=4)
-    # ax.yaxis.set_major_locator(plt.NullLocator())
-    # ax.xaxis.set_major_formatter(plt.NullFormatter())
 
 
     canvas = FigureCanvasTkAgg(fig, master=window)
