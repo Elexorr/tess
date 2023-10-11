@@ -373,7 +373,7 @@ def save_curve():
     for row in lcf[int(sector_num.get())]:
         if JDstart < float(str(row['time'])) < JDend:
             JDtime = row['time'] + 2457000
-            mag = -2.5 * float(row['flux']) + 20
+            mag = -2.5 * float(row['flux.value']) + 20
             line = str(JDtime) + ' ' + str(mag) + ' ' + str(row['flux_err']) + '\n'
             # line = str(row['time']) + ' ' + str(mag) + ' ' + str(row['flux_err']) + '\n'
             # line = str(row['time']) + ' ' + str(row['flux']) + ' ' + str(row['flux_err']) + '\n'
