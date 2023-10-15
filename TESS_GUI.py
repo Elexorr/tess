@@ -152,9 +152,14 @@ def curve_plot():
     window.grid(row=0, column=1, sticky='N')
 
     if fitted == False:
-
+        print(lcf)
         x = lcf[int(sector_num.get())].time.value
         y = lcf[int(sector_num.get())].flux.value
+
+        if y[0] > 10:
+            divisor = 100000
+            result = [(a / divisor - 1) for a in y]
+            y = result
 
         xx = []
         yy = []
@@ -170,16 +175,22 @@ def curve_plot():
                     # print(float(y[i]))
                     yy.append(float(y[i]))
 
+
         else:
-            xx = lcf[int(sector_num.get())].time.value
-            yy = lcf[int(sector_num.get())].flux.value
+            xx = x
+            yy = y
+            # xx = lcf[int(sector_num.get())].time.value
+            # yy = lcf[int(sector_num.get())].flux.value
+
 
         # EXPERIMENTAL ROWS
         # for i in range (0,len(yy)):
         #     zz.append(yy[i]+0.1)
         # EXPERIMENTAL ROWS
 
-        lcf[int(sector_num.get())].to_csv(path_or_buf='lightcurve.csv', overwrite=True)
+        # lcf[int(sector_num.get())].to_csv(path_or_buf='lightcurve.csv', overwrite=True)
+        savecsvename = str(obj_name.get()) + '_' + str(author_selection.get()) + '_' + str(exptime_selection.get()) + '.csv'
+        lcf[int(sector_num.get())].to_csv(path_or_buf= savecsvename, overwrite=True)
 
         # txtcurve = str(obj_name.get()) + '_tess.txt'
         # file = open(txtcurve, 'w')
@@ -387,7 +398,7 @@ def save_curve():
         JDstart = 0
         JDend = 1000000
     global lcf
-    txtcurve = str(obj_name.get()) + '_tess.txt'
+    txtcurve = str(obj_name.get()) + '_selection_tess.txt'
     file = open(txtcurve, 'w')
     print(lcf[int(sector_num.get())])
     # fluxcoef = int(exptime_selection.get())/1800
