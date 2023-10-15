@@ -169,10 +169,10 @@ def curve_plot():
                     xx.append(float(x[i]))
                     # print(float(y[i]))
                     yy.append(float(y[i]))
+
         else:
             xx = lcf[int(sector_num.get())].time.value
-            yy = lcf[int(sector_num.get())].flux
-
+            yy = lcf[int(sector_num.get())].flux.value
 
         # EXPERIMENTAL ROWS
         # for i in range (0,len(yy)):
@@ -251,8 +251,8 @@ Gaussian = IntVar()
 Lorentzian = IntVar()
 checkboxGauss = tk.Checkbutton(master=frame1, text=' Gaussian', variable=Gaussian, onvalue=1, offvalue=0, bg="grey")
 checkboxGauss.place(x=395, y=120)
-checkboxLorentz = tk.Checkbutton(master=frame1, text=' Lorentzian', variable=Lorentzian, onvalue=1, offvalue=0, bg="grey")
-checkboxLorentz.place(x=395, y=140)
+# checkboxLorentz = tk.Checkbutton(master=frame1, text=' Lorentzian', variable=Lorentzian, onvalue=1, offvalue=0, bg="grey")
+# checkboxLorentz.place(x=395, y=140)
 
 def fitprocessing():
     global ax
@@ -280,22 +280,40 @@ def fitprocessing():
                 fyy.append(float(y[i]))
                 invyy.append(1-float(y[i]))
 
-    Maxmagvalue = np.max(fyy, axis = 0)
-    Minmagvalue = np.min(fyy, axis = 0)
+    # Maxmagvalue = np.max(fyy, axis = 0)
+    # Minmagvalue = np.min(fyy, axis = 0)
+
+    Maxmagvalue = np.max(invyy, axis = 0)
+    Minmagvalue = np.min(invyy, axis = 0)
 
     magscale = Maxmagvalue - Minmagvalue
+
+    print(Maxmagvalue, Minmagvalue, magscale)
+    print(invyy)
 
     fstart = float(JDstart_entered.get())  # getting user starting and ending point
     fend = float(JDend_entered.get())      # of fitting
 
     if Gaussian.get() == 1:  # fitting and drawing Gaussian model
         sd = (fend - fstart) / 4
+        # sd = np.sqrt(np.sum((fxx - fxx[len(fxx) // 2]) ** 2) / (len(fxx) - 1))
+        # stddev = np.sqrt(np.sum((orig_wavelength - an_mean) ** 2) / (len(orig_wavelength) - 1))
         g_init = models.Gaussian1D(amplitude=magscale, mean=fxx[len(fxx) // 2], stddev=sd)
+        print('amplitude:', magscale, 'mean:', str(fxx[len(fxx) // 2]), 'stdev:', sd)
         fit_g = fitting.LevMarLSQFitter()
         fitted_g = fit_g(g_init, fxx, invyy)
+        # fitted_g = fit_g(g_init, fxx, fyy)
 
         for i in range (0, len(fxx)):
+            # fitt.append(fitted_g(fxx[i]))
             fitt.append(1-fitted_g(fxx[i]))
+
+        Tmin = round(fitted_g.mean.value, 7)
+        print('Tmin: ', Tmin)
+        T.insert(INSERT, '\n')
+        T.insert(INSERT, 'Tmin: ' + str(Tmin))
+        T.see(tk.END)
+
 
     fitted = True
     ax.cla()
@@ -308,6 +326,7 @@ def fitprocessing():
     # ax.plot(xx, yy, 'b', fxx, fitt, 'r', marker='o', linestyle='dashed', linewidth=1, markersize=4)
     ax.plot(xx, yy, 'b', marker='o', linestyle='dashed', linewidth=1, markersize=4)
     ax.plot(fxx, fitt, 'r', linestyle='-', linewidth=2, markersize=4)
+    minvline = ax.axvline(x=fitted_g.mean.value, color='g', linestyle='--', linewidth=0.5)
     # ax.plot(fxx, fitt, 'r', xx, yy, 'b',  marker='o', linestyle='dashed', linewidth=1, markersize=4)
 
 
@@ -371,17 +390,14 @@ def save_curve():
     txtcurve = str(obj_name.get()) + '_tess.txt'
     file = open(txtcurve, 'w')
     print(lcf[int(sector_num.get())])
-
     # fluxcoef = int(exptime_selection.get())/1800
-
     for row in lcf[int(sector_num.get())]:
         if JDstart < float(str(row['time'].value)) < JDend:
-
             JDtime = row['time'] + 2457000
             mag = -2.5 * float(row['flux'].value) + 20
             # mag = -2.5 * (float(row['flux'].value)*fluxcoef) + 20
-            # line = str(JDtime) + ' ' + str(row['flux'].value) + ' ' + str(row['flux_err'].value) + '\n'
-            line = str(JDtime) + ' ' + str(mag) + ' ' + str(row['flux_err'].value) + '\n'
+            line = str(JDtime) + ' ' + str(row['flux'].value) + ' ' + str(row['flux_err'].value) + '\n'
+            # line = str(JDtime) + ' ' + str(mag) + ' ' + str(row['flux_err'].value) + '\n'
             # line = str(row['time']) + ' ' + str(mag) + ' ' + str(row['flux_err']) + '\n'
             # line = str(row['time']) + ' ' + str(row['flux']) + ' ' + str(row['flux_err']) + '\n'
             # print(line)
