@@ -21,7 +21,7 @@ import pandas as pd
 
 
 root = tk.Tk()
-root.title('TESS project')
+root.title('TESS project v0.5')
 root.state('zoomed')
 root.resizable(True, False)
 
@@ -251,8 +251,8 @@ Gaussian = IntVar()
 Lorentzian = IntVar()
 checkboxGauss = tk.Checkbutton(master=frame1, text=' Gaussian', variable=Gaussian, onvalue=1, offvalue=0, bg="grey")
 checkboxGauss.place(x=395, y=120)
-# checkboxLorentz = tk.Checkbutton(master=frame1, text=' Lorentzian', variable=Lorentzian, onvalue=1, offvalue=0, bg="grey")
-# checkboxLorentz.place(x=395, y=140)
+checkboxLorentz = tk.Checkbutton(master=frame1, text=' Lorentzian', variable=Lorentzian, onvalue=1, offvalue=0, bg="grey", state='disabled')
+checkboxLorentz.place(x=395, y=140)
 
 def fitprocessing():
     global ax
@@ -630,7 +630,7 @@ def crossid():
     #       #print(row['KIC'], row['period'])
 
 
-crossid_button = ttk.Button(frame1, text='  Crossidentification  ', command=crossid)
+crossid_button = ttk.Button(frame1, text='  Crossidentification  ', command=crossid, state='disabled')
 crossid_button.place(x=8, y=650)
 
 curve_plot_button = ttk.Button(frame1, text='Plot Curve', command=curve_plot)
