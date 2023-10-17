@@ -152,13 +152,18 @@ def curve_plot():
     window.grid(row=0, column=1, sticky='N')
 
     if fitted == False:
-        print(lcf)
+        # print(lcf)
+
         x = lcf[int(sector_num.get())].time.value
         y = lcf[int(sector_num.get())].flux.value
 
+        T.insert(INSERT, '\n')
+        T.insert(INSERT, 'Data sample: ' + str(x[0]) + ' ' + str(y[0]))
+        T.see(tk.END)
+
         if y[0] > 10:
             divisor = 100000
-            result = [(a / divisor - 1) for a in y]
+            result = [(a / divisor - 2) for a in y]
             y = result
 
         xx = []
@@ -189,8 +194,9 @@ def curve_plot():
         # EXPERIMENTAL ROWS
 
         # lcf[int(sector_num.get())].to_csv(path_or_buf='lightcurve.csv', overwrite=True)
-        savecsvename = str(obj_name.get()) + '_' + str(author_selection.get()) + '_' + str(exptime_selection.get()) + '.csv'
-        lcf[int(sector_num.get())].to_csv(path_or_buf= savecsvename, overwrite=True)
+
+        # savecsvename = str(obj_name.get()) + '_' + str(author_selection.get()) + '_' + str(exptime_selection.get()) + '.csv'
+        # lcf[int(sector_num.get())].to_csv(path_or_buf= savecsvename, overwrite=True)
 
         # txtcurve = str(obj_name.get()) + '_tess.txt'
         # file = open(txtcurve, 'w')
@@ -219,6 +225,7 @@ def curve_plot():
         figy = (figx * 0.5625)
         fig = plt.Figure(figsize=(figx, figy), dpi = 100)
         #fig.add_subplot(111).plot(x, y, "ro")
+
 
     figx = (screen_x-558)/100
     figy = (figx * 0.5625)
@@ -262,7 +269,7 @@ Gaussian = IntVar()
 Lorentzian = IntVar()
 checkboxGauss = tk.Checkbutton(master=frame1, text=' Gaussian', variable=Gaussian, onvalue=1, offvalue=0, bg="grey")
 checkboxGauss.place(x=395, y=120)
-checkboxLorentz = tk.Checkbutton(master=frame1, text=' Lorentzian', variable=Lorentzian, onvalue=1, offvalue=0, bg="grey", state='disabled')
+checkboxLorentz = tk.Checkbutton(master=frame1, text=' Lorentzian', variable=Lorentzian, onvalue=1, offvalue=0, bg="grey")
 checkboxLorentz.place(x=395, y=140)
 
 def fitprocessing():
@@ -280,7 +287,8 @@ def fitprocessing():
     fxx2 = []
     fyy = []
     invyy = []
-    fitt = []
+    gfitt = []
+    lfitt = []
 
     if JDstart_entered.get() != '':
         JDstart = float(JDstart_entered.get())
@@ -317,12 +325,34 @@ def fitprocessing():
 
         for i in range (0, len(fxx)):
             # fitt.append(fitted_g(fxx[i]))
-            fitt.append(1-fitted_g(fxx[i]))
+            gfitt.append(1-fitted_g(fxx[i]))
 
-        Tmin = round(fitted_g.mean.value, 7)
-        print('Tmin: ', Tmin)
+        GTmin = round(fitted_g.mean.value, 7)
+        print('Tmin (Gaussian): ', GTmin)
         T.insert(INSERT, '\n')
-        T.insert(INSERT, 'Tmin: ' + str(Tmin))
+        T.insert(INSERT, 'Tmin (Gaussian): ' + str(GTmin))
+        T.see(tk.END)
+
+    if Lorentzian.get() == 1:  # fitting and drawing Lorentzian model
+        locmin = Maxmagvalue
+        index = 0
+        for i in range(0, len(invyy)):
+            if invyy[i] < locmin:
+                locmin = invyy[i]
+                index = i
+        l_init = models.Lorentz1D(amplitude=Maxmagvalue, x_0=fxx[index], fwhm=(fend - fstart) / 2)
+        fit_l = fitting.LevMarLSQFitter()
+        fitted_l = fit_l(l_init, fxx, invyy)
+        print(fitted_l)
+
+        for i in range (0, len(fxx)):
+            # fitt.append(fitted_g(fxx[i]))
+            lfitt.append(1-fitted_l(fxx[i]))
+
+        LTmin = round(fitted_l.x_0.value, 7)
+        print('Tmin (Lorentzian): ', LTmin)
+        T.insert(INSERT, '\n')
+        T.insert(INSERT, 'Tmin (Lorentzian): ' + str(LTmin))
         T.see(tk.END)
 
 
@@ -336,8 +366,13 @@ def fitprocessing():
     ax = fig.add_subplot(111)
     # ax.plot(xx, yy, 'b', fxx, fitt, 'r', marker='o', linestyle='dashed', linewidth=1, markersize=4)
     ax.plot(xx, yy, 'b', marker='o', linestyle='dashed', linewidth=1, markersize=4)
-    ax.plot(fxx, fitt, 'r', linestyle='-', linewidth=2, markersize=4)
-    minvline = ax.axvline(x=fitted_g.mean.value, color='g', linestyle='--', linewidth=0.5)
+    if Gaussian.get() == 1:
+        ax.plot(fxx, gfitt, 'r', linestyle='-', linewidth=2, markersize=4)
+        gminvline = ax.axvline(x=fitted_g.mean.value, color='g', linestyle='--', linewidth=0.5)
+    if Lorentzian.get() == 1:
+        ax.plot(fxx, lfitt, 'y', linestyle='-', linewidth=2, markersize=4)
+        lminvline = ax.axvline(x=fitted_l.x_0.value, color='y', linestyle='--', linewidth=0.5)
+
     # ax.plot(fxx, fitt, 'r', xx, yy, 'b',  marker='o', linestyle='dashed', linewidth=1, markersize=4)
 
 
