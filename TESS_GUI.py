@@ -343,7 +343,7 @@ def fitprocessing():
         l_init = models.Lorentz1D(amplitude=Maxmagvalue, x_0=fxx[index], fwhm=(fend - fstart) / 2)
         fit_l = fitting.LevMarLSQFitter()
         fitted_l = fit_l(l_init, fxx, invyy)
-        print(fitted_l)
+        # print(fitted_l)
 
         for i in range (0, len(fxx)):
             # fitt.append(fitted_g(fxx[i]))
