@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import *
 from tkinter import ttk
+from tkinter.messagebox import showinfo
 import os
 import lightkurve as lk
 import numpy as np
@@ -571,29 +572,33 @@ find_tic_button.place(x=300, y=148)
 
 
 def plot_phased():
-    global window
-    window = tk.Canvas(master=root, width=screen_x - 558, height=screen_y - 50, bg='white')
-    window.grid(row=0, column=1, sticky='N')
-    folded_lcf = lcf[int(sector_num.get())].fold(period, t0)
-    # print(folded_lcf)
-    x = folded_lcf.time.value
-    y = folded_lcf.flux
-    # x = folded_lcf[int(sector_num.get())].phase.value
-    # y = folded_lcf[int(sector_num.get())].flux
-    # x = lcf[int(sector_num.get())].time.value
-    # y = lcf[int(sector_num.get())].flux
-    figx = (screen_x-558)/100
-    figy = (figx * 0.5625)
-    fig = plt.Figure(figsize=(figx, figy), dpi = 100)
-    #fig.add_subplot(111).plot(x, y, "ro")
-    fig.add_subplot(111).plot(x, y, color='blue', marker='o', linestyle='dashed',
-     linewidth=1, markersize=4)
-    canvas = FigureCanvasTkAgg(fig, master=window)
-    canvas.draw()
-    canvas.get_tk_widget().pack()
-    toolbar = NavigationToolbar2Tk(canvas, window)
-    toolbar.update()
-    canvas._tkcanvas.pack()
+    global period
+    if 'period' in globals():
+        global window
+        window = tk.Canvas(master=root, width=screen_x - 558, height=screen_y - 50, bg='white')
+        window.grid(row=0, column=1, sticky='N')
+        folded_lcf = lcf[int(sector_num.get())].fold(period, t0)
+        # print(folded_lcf)
+        x = folded_lcf.time.value
+        y = folded_lcf.flux
+        # x = folded_lcf[int(sector_num.get())].phase.value
+        # y = folded_lcf[int(sector_num.get())].flux
+        # x = lcf[int(sector_num.get())].time.value
+        # y = lcf[int(sector_num.get())].flux
+        figx = (screen_x-558)/100
+        figy = (figx * 0.5625)
+        fig = plt.Figure(figsize=(figx, figy), dpi = 100)
+        #fig.add_subplot(111).plot(x, y, "ro")
+        fig.add_subplot(111).plot(x, y, color='blue', marker='o', linestyle='dashed',
+         linewidth=1, markersize=4)
+        canvas = FigureCanvasTkAgg(fig, master=window)
+        canvas.draw()
+        canvas.get_tk_widget().pack()
+        toolbar = NavigationToolbar2Tk(canvas, window)
+        toolbar.update()
+        canvas._tkcanvas.pack()
+    else:
+        showinfo(title='Plot phased', message='Period and M0 not defined')
 
 
 def crossid():
