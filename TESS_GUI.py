@@ -117,7 +117,6 @@ def refined_search():
     sector_num.insert(0, 0)
     sector_num.place(x=340, y=8)
     if len(search_lcf_refined.table) != 0:
-        global lcf
         lcf = search_lcf_refined.download_all()
 
 
@@ -158,11 +157,16 @@ def curve_plot():
         x = lcf[int(sector_num.get())].time.value
         y = lcf[int(sector_num.get())].flux.value
 
+
+        print('Hello')
+        # for i in range(0,10):
+        #     print(y[i])
+
         T.insert(INSERT, '\n')
         T.insert(INSERT, 'Data sample: ' + str(x[0]) + ' ' + str(y[0]))
         T.see(tk.END)
 
-        if y[0] > 10:
+        if y[1] > 10:
             divisor = 100000
             result = [(a / divisor - 2) for a in y]
             y = result
@@ -537,7 +541,10 @@ def find_tic():
         print(t0)
 
     kic_id = 'KIC '+ kic_num
-    url = "http://keplerebs.villanova.edu/includes/" + kic_num + ".00.lc.pf.png"  #
+    if len(kic_num) == 7:  #
+        url = "http://keplerebs.villanova.edu/includes/" + "0" + kic_num + ".00.lc.pf.png"  # Vytvori url na stiahnutie
+    else:  # obrazku dtr krivky
+        url = "http://keplerebs.villanova.edu/includes/" + kic_num + ".00.lc.pf.png"  #
     data = requests.get(url).content  # Stiahne obrazok dtr krivky
     file_name = "temp.png"  # Ulozi obrazok dtr krivky
     f = open("temp.png", 'wb')  # v prislusnom podadresari
