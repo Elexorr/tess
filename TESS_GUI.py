@@ -608,6 +608,50 @@ def plot_phased():
         showinfo(title='Plot phased', message='Period and M0 not defined')
 
 
+def frame():
+    global search_ffi
+    search_ffi = lk.search_tesscut(obj_name.get())
+    T.insert(INSERT, '\n')
+    T.insert(INSERT, search_ffi)
+    found_sectors = len(search_ffi)
+    nums = []
+    for i in range (0, found_sectors):
+        nums.append(i)
+    global sector_num
+    sector_num = ttk.Combobox(frame1, value=nums, width=3)
+    sector_num.insert(0, 0)
+    sector_num.place(x=340, y=8)
+
+def plot_frame():
+    global found_sectors, search_ffi
+    ffi_data = search_ffi[int(sector_num.get())].download(cutout_size=10)
+    print(ffi_data)
+    ffi_data.plot()
+    plt.show()
+
+    # figx = (screen_x-558)/100
+    # figy = (figx * 0.5625)
+    # fig = plt.Figure(figsize=(figx, figy), dpi = 100)
+    # ax = fig.add_subplot(111)
+    # ax.plot([1,1,1],[1,1,1])
+    # canvas = FigureCanvasTkAgg(fig, master=window)
+    # # plt.show()
+    # canvas.draw()
+    # # canvas.get_tk_widget().pack()
+    # # toolbar = NavigationToolbar2Tk(canvas, window)
+    # # toolbar.update()
+    # # cid = fig.canvas.mpl_connect('button_press_event', onclick)
+    # canvas._tkcanvas.pack()
+
+
+
+frame_button = ttk.Button(frame1, text='Full Frame Image', command=frame)
+frame_button.place(x=400, y=500)
+
+plot_frame_button = ttk.Button(frame1, text='Plot FF Image', command=plot_frame)
+plot_frame_button.place(x=300, y=500)
+
+
 def crossid():
     T2 = Text(master=window, height=50, width=165, bg='Light grey', bd=3, padx=10)  # Vytvori textovu plochu
     T2.place(x=5, y=5)                                                              # pre vypisy
