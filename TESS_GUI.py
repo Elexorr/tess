@@ -520,6 +520,7 @@ def find_tic():
     global lcf
     global period
     global t0
+    global window
     # window.destroy()
     # if 'canvas' in globals():
     #     canvas.destroy()
@@ -609,11 +610,23 @@ def plot_phased():
 
 
 def frame():
-    global search_ffi
-    search_ffi = lk.search_tesscut(obj_name.get())
+    # global search_ffi
+    global search_tpf
+    # search_ffi = lk.search_tesscut(obj_name.get())
+    search_tpf = lk.search_tesscut(obj_name.get())
+    # T.insert(INSERT, '\n')
+    # T.insert(INSERT, search_ffi)
     T.insert(INSERT, '\n')
-    T.insert(INSERT, search_ffi)
-    found_sectors = len(search_ffi)
+    T.insert(INSERT, search_tpf)
+    # found_sectors = len(search_ffi)
+    # nums = []
+    # for i in range (0, found_sectors):
+    #     nums.append(i)
+    # global sector_num
+    # sector_num = ttk.Combobox(frame1, value=nums, width=3)
+    # sector_num.insert(0, 0)
+    # sector_num.place(x=340, y=8)
+    found_sectors = len(search_tpf)
     nums = []
     for i in range (0, found_sectors):
         nums.append(i)
@@ -623,25 +636,25 @@ def frame():
     sector_num.place(x=340, y=8)
 
 def plot_frame():
-    global found_sectors, search_ffi
-    ffi_data = search_ffi[int(sector_num.get())].download(cutout_size=10)
-    print(ffi_data)
-    ffi_data.plot()
-    plt.show()
-
-    # figx = (screen_x-558)/100
-    # figy = (figx * 0.5625)
-    # fig = plt.Figure(figsize=(figx, figy), dpi = 100)
-    # ax = fig.add_subplot(111)
-    # ax.plot([1,1,1],[1,1,1])
-    # canvas = FigureCanvasTkAgg(fig, master=window)
-    # # plt.show()
-    # canvas.draw()
-    # # canvas.get_tk_widget().pack()
-    # # toolbar = NavigationToolbar2Tk(canvas, window)
-    # # toolbar.update()
-    # # cid = fig.canvas.mpl_connect('button_press_event', onclick)
-    # canvas._tkcanvas.pack()
+    # global found_sectors, search_ffi
+    global found_sectors, search_tpf, window
+    # ffi_data = search_ffi[int(sector_num.get())].download(cutout_size=10)
+    tpf_data = search_tpf[int(sector_num.get())].download(cutout_size=10)
+    # ffi_data.plot()
+    # plt.show()
+    # temptpf = tpf_data.plot()
+    tpf_data.plot().figure.savefig('temptpf.png')
+    tpfpng = Image.open('temptpf.png')
+    # img2 = PhotoImage(file='temptpf.png')
+    # img2 = tpfpng.resize((240, 180))
+    tpfpng_crop = tpfpng.crop((230, 0, 760, 400))
+    img2 = ImageTk.PhotoImage(tpfpng_crop.resize((239, 180)))
+    # img2crop = img2.crop((100, 0, 340, 180))
+    # window.create_image((screen_x-558)//2.2, (screen_y-50)//4, image=img2)
+    window.create_image(450, 900, image=img2)
+    window.update()
+    # tpf_data.plot()
+    # plt.show()
 
 
 
