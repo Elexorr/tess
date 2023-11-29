@@ -461,7 +461,7 @@ save_curve_button.place(x=400, y=87)
 
 
 kepler_label = tk.Label(master=frame1, font=('Helvetica', 10), text='Kepler Eclipsing Binary Catalog', bg='grey')
-kepler_label.place(x=5, y=125)
+kepler_label.place(x=5, y=225)
 
 
 kic_ids = []
@@ -472,9 +472,9 @@ with open('kepler.csv', newline='') as csvfile:
     kic_ids = sorted(kic_ids)
 
 kic_label = tk.Label(master=frame1, font=('Helvetica', 10), text='KIC ID:', bg='grey')
-kic_label.place(x=5, y=150)
+kic_label.place(x=5, y=250)
 kic_id_input = ttk.Combobox(frame1, value=kic_ids, width = 20)
-kic_id_input.place(x=65, y=150)
+kic_id_input.place(x=65, y=250)
 
 
 def read_kic_id():
@@ -512,7 +512,7 @@ def read_kic_id():
 
 
 kic_input_button = ttk.Button(frame1, text='Add KIC ID', command=read_kic_id)
-kic_input_button.place(x=220, y=148)
+kic_input_button.place(x=220, y=248)
 
 global canvas
 
@@ -576,7 +576,7 @@ def find_tic():
 
 
 find_tic_button = ttk.Button(frame1, text='Find TIC ID', command=find_tic)
-find_tic_button.place(x=300, y=148)
+find_tic_button.place(x=300, y=248)
 
 
 def plot_phased():
@@ -651,7 +651,7 @@ def plot_frame():
     img2 = ImageTk.PhotoImage(tpfpng_crop.resize((239, 180)))
     # img2crop = img2.crop((100, 0, 340, 180))
     # window.create_image((screen_x-558)//2.2, (screen_y-50)//4, image=img2)
-    window.create_image(450, 900, image=img2)
+    window.create_image(475, 900, image=img2)
     window.update()
     # tpf_data.plot()
     # plt.show()
@@ -659,10 +659,10 @@ def plot_frame():
 
 
 frame_button = ttk.Button(frame1, text='Full Frame Image', command=frame)
-frame_button.place(x=400, y=500)
+frame_button.place(x=10, y=150)
 
 plot_frame_button = ttk.Button(frame1, text='Plot FF Image', command=plot_frame)
-plot_frame_button.place(x=300, y=500)
+plot_frame_button.place(x=120, y=150)
 
 
 def crossid():
