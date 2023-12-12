@@ -98,13 +98,17 @@ def find_tic():
 find_tic_button = ttk.Button(frame1, text='Find TIC ID', command=find_tic)
 find_tic_button.place(x=235, y=36)
 
-sector_label = tk.Label(master=frame1, font=('Helvetica', 10), text='#:', bg='grey')
-sector_label.place(x=100, y=80)
+sector_label = tk.Label(master=frame1, font=('Helvetica', 10), text='Sector #:', bg='grey')
+sector_label.place(x=90, y=80)
 sector_num = tk.IntVar()
 global found_sectors
 found_sectors = []
-sector_num = ttk.Combobox(frame1, value=found_sectors, width = 3)
-sector_num.place(x=120, y=82)
+sector_num = ttk.Combobox(frame1, value=found_sectors, justify=CENTER, width = 3)
+sector_num.place(x=150, y=82)
+size_entry = tk.Spinbox(master=frame1, from_=11, to=201, increment=10, justify=CENTER, width=5)
+size_entry.place(x=145, y=112)
+size_entry_label = tk.Label(master=frame1, font=('Helvetica', 10), text='Size:', bg='grey')
+size_entry_label.place(x=90, y=110)
 
 
 def searchffi():
@@ -123,7 +127,7 @@ def searchffi():
     global sector_num
     sector_num = ttk.Combobox(frame1, value=nums, width=3)
     sector_num.insert(0, 0)
-    sector_num.place(x=120, y=82)
+    sector_num.place(x=150, y=82)
     # ffi_data = search_ffi[1].download(cutout_size=21)
 
     # ffi_data.plot()
@@ -132,7 +136,7 @@ def searchffi():
 def plot_ffi():
     plt.close()
     global target_mask, ffi_plot, ffi_data, window, ax
-    ffi_data = search_ffi[int(sector_num.get())].download(cutout_size=31)
+    ffi_data = search_ffi[int(sector_num.get())].download(cutout_size=int(size_entry.get()))
     window = tk.Canvas(master=root, width=500, height=500, bg='white')
     window.grid(row=0, column=1, sticky='N')
     target_mask = ffi_data.create_threshold_mask(threshold=threshold_entry.get(), reference_pixel='center')
@@ -175,16 +179,30 @@ def plot_ffi_update():
 
 
 def plot_curve():
+    global ffi_lc
     plt.close()
     ffi_lc = ffi_data.to_lightcurve(aperture_mask=target_mask)
     # print(ffi_lc)
     ffi_lc.plot(label="SAP FFI")
     plt.show()
 
+def save_curve():
+    # global ffi_lc
+    txtcurve = str(obj_name.get()) + '_ffi.txt'
+    file = open(txtcurve, 'w')
+    print(ffi_lc)
+    # fluxcoef = int(exptime_selection.get())/1800
+    for row in ffi_lc:
+        line = str(row['time']) + ' ' + str(row['flux'].value) + ' ' + str(row['flux_err'].value) + '\n'
+        file.write(line)
+    file.close()
+
 
 threshold_entry = tk.Spinbox(master=frame1, from_=1, to=200, increment=1,
                           command=plot_ffi_update, justify=CENTER, width=5)
-threshold_entry.place(x=300, y=82)
+threshold_entry.place(x=350, y=82)
+threshold_label = tk.Label(master=frame1, font=('Helvetica', 10), text='Threshold:', bg='grey')
+threshold_label.place(x=280, y=80)
 
 searchffi_button = ttk.Button(frame1, text='Search FFI', command=searchffi)
 searchffi_button.place(x=10, y=80)
@@ -192,8 +210,14 @@ searchffi_button.place(x=10, y=80)
 plotffi_button = ttk.Button(frame1, text='Plot FFI', command=plot_ffi)
 plotffi_button.place(x=200, y=80)
 
+updateffi_button = ttk.Button(frame1, text='Update FFI', command=plot_ffi_update)
+updateffi_button.place(x=405, y=80)
+
 plotcurve_button = ttk.Button(frame1, text='Plot Curve', command=plot_curve)
-plotcurve_button.place(x=400, y=80)
+plotcurve_button.place(x=405, y=36)
+
+plotcurve_button = ttk.Button(frame1, text='Save Curve', command=save_curve)
+plotcurve_button.place(x=405, y=6)
 
 
 root.mainloop()
