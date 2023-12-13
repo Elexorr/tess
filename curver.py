@@ -132,11 +132,28 @@ def searchffi():
 
     # ffi_data.plot()
 
+coordinates_label = tk.Label(master=frame1, font=('Helvetica', 10), text='Frame position:', bg='grey')
+coordinates_label.place(x=10, y=228)
+dec_output = ttk.Entry(master=frame1, text='', width=10, font="Times 10 bold")
+dec_output.place(x=50, y=250)
+dec_output_label = tk.Label(master=frame1, font=('Helvetica', 10), text='DEC:', bg='grey')
+dec_output_label.place(x=10, y=250)
+ra_output = ttk.Entry(master=frame1, text='', width=10, font="Times 10 bold")
+ra_output.place(x=50, y=275)
+ra_output_label = tk.Label(master=frame1, font=('Helvetica', 10), text='RA:', bg='grey')
+ra_output_label.place(x=10, y=275)
+
 
 def plot_ffi():
     plt.close()
     global target_mask, ffi_plot, ffi_data, window, ax
     ffi_data = search_ffi[int(sector_num.get())].download(cutout_size=int(size_entry.get()))
+
+    dec_output.delete(0, END)
+    dec_output.insert(0, str(round(ffi_data.dec, 6)))
+    ra_output.delete(0, END)
+    ra_output.insert(0, str(round(ffi_data.ra, 6)))
+
     window = tk.Canvas(master=root, width=500, height=500, bg='white')
     window.grid(row=0, column=1, sticky='N')
     target_mask = ffi_data.create_threshold_mask(threshold=threshold_entry.get(), reference_pixel='center')
