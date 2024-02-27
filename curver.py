@@ -9,15 +9,18 @@ from astroquery.mast import Catalogs
 import lightkurve as lk
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from matplotlib.backends.backend_tkagg import NavigationToolbar2Tk
+# from matplotlib.backends.backend_tkagg import NavigationToolbar2Tk
 
 root=tk.Tk()
 root.title('TESS FFI curver 0.1')
 root.resizable(False, False)
+root.configure(bg='white')
 frame1 = tk.Frame(master=root, width=520, height=506, bg='grey')
 frame1.grid(row=0, column=0, sticky='N')
 T = Text(master=frame1, height=12, width=60, bg='Light grey', bd=3, padx=10)
 T.place(x=5, y=300)
+# window = tk.Canvas(width=0, height=0, bg='Light grey')
+# window.grid(row=0, column=1, sticky='N')
 
 kic_ids = []
 with open('kepler.csv', newline='') as csvfile:
@@ -37,16 +40,20 @@ tic_label.place(x=5, y=10)
 obj_name_entered = ttk.Entry(frame1, width=20, textvariable=obj_name)
 obj_name_entered.place(x=85, y=10)
 
+
 def find_tic():
     global lcf
     global period
     global t0
     global window
-    # window.destroy()
-    # if 'canvas' in globals():
-    #     canvas.destroy()
+
+    for widget in root.winfo_children():
+        if isinstance(widget, tk.Canvas):
+            widget.destroy()
+
     window = tk.Canvas(master=root, width=500, height=500, bg='white')
     window.grid(row=0, column=1, sticky='N')
+
     kic_num = kic_id_input.get()
 
     with open('kepler.csv', newline='') as csvfile:
@@ -73,7 +80,7 @@ def find_tic():
     f.write(data)  #
     f.close()  #
     kic_phased = Image.open('temp.png')
-    kic_ph_resized = kic_phased.resize((500,375))
+    kic_ph_resized = kic_phased.resize((520,375))
     img = ImageTk.PhotoImage(kic_ph_resized)
     search_radius_deg = 0.001
     catalogTIC = Catalogs.query_object(kic_id, radius=search_radius_deg,
@@ -92,7 +99,7 @@ def find_tic():
     window.create_text(250, 400, text = kic_id + '\n' + 'Period: ' + str(period) + '\n' + 'M0: '+ str(t0), font=('Times 10 bold'), justify='left')
     # # window.create_text(270, 870, text = 'Period: '+ str(period), font=('Times 10 bold'))
     # # window.create_text(270, 890, text= 'M0: '+ str(t0), font=('Times 10 bold'))
-    window.update()
+    # window.update()
     window.mainloop()
 
 find_tic_button = ttk.Button(frame1, text='Find TIC ID', command=find_tic)
@@ -114,10 +121,13 @@ size_entry_label.place(x=90, y=110)
 def searchffi():
     global search_ffi, ffi_data
     search_ffi = lk.search_tesscut(obj_name_entered.get())
-    # search_tpf = lk.search_targetpixelfile('V523 Cas')
+    # search_tpf = lk.search_targetpixelfile(obj_name_entered.get())
     # search_lcf = lk.search_lightcurve('V523 Cas')
-    T.insert(INSERT, '\n')
+    T.insert(INSERT, 'SearchResult for ' + obj_name_entered.get() + '\n')
     T.insert(INSERT, search_ffi)
+    T.insert(INSERT, '\n')
+    T.insert(INSERT, '\n')
+    T.see(tk.END)
     # T.update()
     # print(search_ffi)
     found_sectors = len(search_ffi)
@@ -146,8 +156,14 @@ ra_output_label.place(x=10, y=275)
 
 def plot_ffi():
     plt.close()
-    global target_mask, ffi_plot, ffi_data, window, ax
+    global search_ffi, target_mask, ffi_plot, ffi_data, window, ax, plotwidth, plotheight
     ffi_data = search_ffi[int(sector_num.get())].download(cutout_size=int(size_entry.get()))
+    rows = cutout_size=int(size_entry.get())
+    # ffi_data.show_properties()
+    plotwidth = ffi_data.column - 0.5
+    plotheight = ffi_data.row - 0.5
+    # print(plotwidth, plotheight)
+    # print(ffi_data)
 
     dec_output.delete(0, END)
     dec_output.insert(0, str(round(ffi_data.dec, 6)))
@@ -157,49 +173,97 @@ def plot_ffi():
     window = tk.Canvas(master=root, width=500, height=500, bg='white')
     window.grid(row=0, column=1, sticky='N')
     target_mask = ffi_data.create_threshold_mask(threshold=threshold_entry.get(), reference_pixel='center')
-    n_target_pixels = target_mask.sum()
-    print('Number of pixels:', n_target_pixels)
     fig, ax = plt.subplots()
-    ffi_plot = ffi_data.plot(ax = ax, aperture_mask=target_mask, mask_color='r')
-    # ffi_plot = ffi_data.plot(aperture_mask=target_mask, mask_color='r')
-    # plt.show()
+    # ffi_plot = ffi_data.plot(ax = ax, aperture_mask=target_mask, mask_color='r')
+    ffi_plot = ffi_data.plot(ax=ax, aperture_mask=target_mask, mask_color='r')
+    plt.close()
+    # print(target_mask)
 
     canvas = FigureCanvasTkAgg(fig, master=window)
     canvas.draw()
-    canvas.get_tk_widget().pack()
-    toolbar = NavigationToolbar2Tk(canvas, window)
-    toolbar.update()
-    # cid = fig.canvas.mpl_connect('button_press_event', onclick)
+    # canvas.get_tk_widget().pack()
+    # toolbar = NavigationToolbar2Tk(canvas, window)
+    # toolbar.update()
     canvas._tkcanvas.pack()
 
 
 def plot_ffi_update():
     global ffi_plot, ax
+    global target_mask
+    global window
     plt.close()
+
     window = tk.Canvas(master=root, width=500, height=500, bg='white')
     window.grid(row=0, column=1, sticky='N')
     target_mask = ffi_data.create_threshold_mask(threshold=threshold_entry.get(), reference_pixel='center')
-    # print('Number of pixels:', n_target_pixels)
-    # ffi_plot = ffi_data.plot(aperture_mask=target_mask, mask_color='r')
-    # ffi_plot.update()
     fig, ax = plt.subplots()
     ffi_plot = ffi_data.plot(ax=ax, aperture_mask=target_mask, mask_color='r')
-    # ffi_data.plot(aperture_mask=target_mask, mask_color='r')
 
     canvas = FigureCanvasTkAgg(fig, master=window)
     canvas.draw()
-    canvas.get_tk_widget().pack()
-    toolbar = NavigationToolbar2Tk(canvas, window)
-    toolbar.update()
-    # cid = fig.canvas.mpl_connect('button_press_event', onclick)
+    # canvas.get_tk_widget().pack()
+    # toolbar = NavigationToolbar2Tk(canvas, window)
+    # toolbar.update()
+    canvas._tkcanvas.pack()
+
+
+def makeownmask():
+    global target_mask
+    global window
+    plt.close()
+
+    window = tk.Canvas(master=root, width=500, height=500, bg='white')
+    window.grid(row=0, column=1, sticky='N')
+    target_mask = ffi_data.create_threshold_mask(threshold=1000, reference_pixel='center')
+    # print(target_mask)
+    fig, ax = plt.subplots()
+    ffi_plot = ffi_data.plot(ax=ax, aperture_mask=target_mask, mask_color='#0000FF')
+    cid = plt.gcf().canvas.mpl_connect('button_press_event', setmaskpixel)
+    canvas = FigureCanvasTkAgg(fig, master=window)
+    # canvas.draw()
+    # canvas.get_tk_widget().pack()
+    # toolbar = NavigationToolbar2Tk(canvas, window)
+    # toolbar.update()
+    canvas._tkcanvas.pack()
+
+
+makeownmask_button = ttk.Button(frame1, text='Set Mask', command=makeownmask)
+makeownmask_button.place(x=200, y=110)
+
+def setmaskpixel(event):
+    global target_mask
+    global window
+    ix, iy = event.xdata, event.ydata
+    # print(f'x = {ix}, y = {iy}')
+    mask_y = int((ix - plotwidth)//1)
+    mask_x = int((iy - plotheight)//1)
+    # print(mask_x, mask_y)
+    # print(target_mask[mask_x, mask_y])
+    if target_mask[mask_x, mask_y] == False:
+        target_mask[mask_x, mask_y] = True
+    else:
+        target_mask[mask_x, mask_y] = False
+    plt.close()
+
+    window = tk.Canvas(master=root, width=500, height=500, bg='white')
+    window.grid(row=0, column=1, sticky='N')
+    fig, ax = plt.subplots()
+    ffi_plot = ffi_data.plot(ax=ax, aperture_mask=target_mask, mask_color='#0000FF')
+    cid = plt.gcf().canvas.mpl_connect('button_press_event', setmaskpixel)
+
+    canvas = FigureCanvasTkAgg(fig, master=window)
+    canvas.draw()
+    # canvas.get_tk_widget().pack()
+    # toolbar = NavigationToolbar2Tk(canvas, window)
+    # toolbar.update()
     canvas._tkcanvas.pack()
 
 
 def plot_curve():
     global ffi_lc
     plt.close()
+    # print(target_mask)
     ffi_lc = ffi_data.to_lightcurve(aperture_mask=target_mask)
-    # print(ffi_lc)
     ffi_lc.plot(label="SAP FFI")
     plt.show()
 
