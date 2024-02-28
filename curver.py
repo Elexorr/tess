@@ -15,9 +15,9 @@ root=tk.Tk()
 root.title('TESS FFI curver 0.1')
 root.resizable(False, False)
 root.configure(bg='white')
-frame1 = tk.Frame(master=root, width=520, height=506, bg='grey')
+frame1 = tk.Frame(master=root, width=542, height=506, bg='grey')
 frame1.grid(row=0, column=0, sticky='N')
-T = Text(master=frame1, height=12, width=60, bg='Light grey', bd=3, padx=10)
+T = Text(master=frame1, height=12, width=63, bg='Light grey', bd=3, padx=10)
 T.place(x=5, y=300)
 
 kic_ids = []
@@ -126,7 +126,8 @@ def searchffi():
     # search_lcf = lk.search_lightcurve('V523 Cas')
     T.insert(INSERT, 'SearchResult for ' + obj_name_entered.get() + '\n')
     T.insert(INSERT, search_ffi)
-    T.insert(INSERT, '\n')
+    # T.insert(INSERT, '\n')
+    T.insert(INSERT, '\n--------------------------------------------------------------')
     T.insert(INSERT, '\n')
     T.see(tk.END)
 
