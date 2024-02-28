@@ -4,14 +4,14 @@ from tkinter import ttk
 import numpy as np
 import csv
 import requests
-from PIL import Image,ImageTk
+from PIL import Image, ImageTk
 from astroquery.mast import Catalogs
 import lightkurve as lk
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 # from matplotlib.backends.backend_tkagg import NavigationToolbar2Tk
 
-root=tk.Tk()
+root = tk.Tk()
 root.title('TESS FFI curver 0.1')
 root.resizable(False, False)
 root.configure(bg='white')
@@ -29,7 +29,7 @@ with open('kepler.csv', newline='') as csvfile:
 
 kic_label = tk.Label(master=frame1, font=('Helvetica', 10), text='KIC ID:', bg='grey')
 kic_label.place(x=5, y=38)
-kic_id_input = ttk.Combobox(frame1, value=kic_ids, width = 20)
+kic_id_input = ttk.Combobox(frame1, value=kic_ids, width=20)
 kic_id_input.place(x=85, y=38)
 
 obj_name = tk.StringVar()
@@ -38,10 +38,12 @@ tic_label.place(x=5, y=10)
 obj_name_entered = ttk.Entry(frame1, width=20, textvariable=obj_name)
 obj_name_entered.place(x=85, y=10)
 
+
 def create_output_window():
     global output_window
     output_window = tk.Canvas(master=root, width=500, height=500, bg='white')
     output_window.grid(row=0, column=1, sticky='N')
+
 
 def embed_plot(maskcolor):
     fig, ax = plt.subplots()
@@ -49,6 +51,7 @@ def embed_plot(maskcolor):
     canvas = FigureCanvasTkAgg(fig, master=output_window)
     canvas.draw()
     canvas._tkcanvas.pack()
+
 
 def find_tic():
     global lcf
@@ -71,18 +74,17 @@ def find_tic():
         period = float(period)
         t0 = float(t0)
 
-    kic_id = 'KIC '+ kic_num
+    kic_id = 'KIC ' + kic_num
     if len(kic_num) == 7:  #
         url = "http://keplerebs.villanova.edu/includes/" + "0" + kic_num + ".00.lc.pf.png"  # Vytvori url na stiahnutie
     else:                                                                                   # obrazku dtr krivky
         url = "http://keplerebs.villanova.edu/includes/" + kic_num + ".00.lc.pf.png"  #
-    data = requests.get(url).content  # Stiahne obrazok dtr krivky
-    file_name = "temp.png"  # Ulozi obrazok dtr krivky
-    f = open("temp.png", 'wb')  # v prislusnom podadresari
+    data = requests.get(url).content        # Stiahne obrazok dtr krivky
+    f = open("temp.png", 'wb')              # Ulozi obrazok dtr krivky v prislusnom podadresari
     f.write(data)  #
     f.close()  #
     kic_phased = Image.open('temp.png')
-    kic_ph_resized = kic_phased.resize((520,375))
+    kic_ph_resized = kic_phased.resize((520, 375))
     img = ImageTk.PhotoImage(kic_ph_resized)
     search_radius_deg = 0.001
     catalogTIC = Catalogs.query_object(kic_id, radius=search_radius_deg,
@@ -100,8 +102,10 @@ def find_tic():
         
     create_output_window()
     output_window.create_image(250, 188, image=img)
-    output_window.create_text(250, 400, text = kic_id + '\n' + 'Period: ' + str(period) + '\n' + 'M0: '+ str(t0), font=('Times 10 bold'), justify='left')
+    output_window.create_text(250, 400, text=kic_id + '\n' + 'Period: ' + str(period) + '\n' + 'M0: ' + str(t0),
+                              font='Times 10 bold', justify='left')
     output_window.mainloop()
+
 
 find_tic_button = ttk.Button(frame1, text='Find TIC ID', command=find_tic)
 find_tic_button.place(x=235, y=36)
@@ -111,7 +115,7 @@ sector_label.place(x=90, y=80)
 sector_num = tk.IntVar()
 global found_sectors
 found_sectors = []
-sector_num = ttk.Combobox(frame1, value=found_sectors, justify=CENTER, width = 3)
+sector_num = ttk.Combobox(frame1, value=found_sectors, justify=CENTER, width=3)
 sector_num.place(x=150, y=82)
 size_entry = tk.Spinbox(master=frame1, from_=11, to=201, increment=10, justify=CENTER, width=5)
 size_entry.place(x=145, y=112)
@@ -133,7 +137,7 @@ def searchffi():
 
     found_sectors = len(search_ffi)
     nums = []
-    for i in range (0, found_sectors):
+    for i in range(0, found_sectors):
         nums.append(i)
     global sector_num
     sector_num = ttk.Combobox(frame1, value=nums, width=3)
@@ -201,7 +205,7 @@ def makeownmask():
 
     create_output_window()
     embed_plot('#0000FF')
-    cid = plt.gcf().canvas.mpl_connect('button_press_event', setmaskpixel)
+    plt.gcf().canvas.mpl_connect('button_press_event', setmaskpixel)
     # canvas.get_tk_widget().pack()
     # toolbar = NavigationToolbar2Tk(canvas, output_window)
     # toolbar.update()
@@ -209,6 +213,7 @@ def makeownmask():
 
 makeownmask_button = ttk.Button(frame1, text='Set Mask', command=makeownmask)
 makeownmask_button.place(x=200, y=110)
+
 
 def setmaskpixel(event):
     global target_mask
@@ -226,7 +231,7 @@ def setmaskpixel(event):
 
     create_output_window()
     embed_plot('#0000FF')
-    cid = plt.gcf().canvas.mpl_connect('button_press_event', setmaskpixel)
+    plt.gcf().canvas.mpl_connect('button_press_event', setmaskpixel)
     # canvas.get_tk_widget().pack()
     # toolbar = NavigationToolbar2Tk(canvas, output_window)
     # toolbar.update()
@@ -238,6 +243,7 @@ def plot_curve():
     ffi_lc = ffi_data.to_lightcurve(aperture_mask=target_mask)
     ffi_lc.plot(label="SAP FFI")
     plt.show()
+
 
 def save_curve():
     # global ffi_lc
@@ -251,7 +257,7 @@ def save_curve():
 
 
 threshold_entry = tk.Spinbox(master=frame1, from_=1, to=200, increment=1,
-                          command=plot_ffi_update, justify=CENTER, width=5)
+                             command=plot_ffi_update, justify=CENTER, width=5)
 threshold_entry.place(x=350, y=82)
 threshold_label = tk.Label(master=frame1, font=('Helvetica', 10), text='Threshold:', bg='grey')
 threshold_label.place(x=280, y=80)
@@ -270,6 +276,5 @@ plotcurve_button.place(x=405, y=36)
 
 plotcurve_button = ttk.Button(frame1, text='Save Curve', command=save_curve)
 plotcurve_button.place(x=405, y=6)
-
 
 root.mainloop()
