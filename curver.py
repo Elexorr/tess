@@ -46,8 +46,12 @@ def create_output_window():
 
 
 def embed_plot(maskcolor):
+    global search
     fig, ax = plt.subplots()
-    ffi_plot = ffi_data.plot(ax=ax, aperture_mask=target_mask, mask_color=maskcolor)
+    if search == 'ffi':
+        ffi_plot = ffi_data.plot(ax=ax, aperture_mask=target_mask, mask_color=maskcolor)
+    elif search == 'tpf':
+        tpf_plot = tpf_data.plot(ax=ax, aperture_mask=target_mask, mask_color=maskcolor)
     canvas = FigureCanvasTkAgg(fig, master=output_window)
     canvas.draw()
     canvas._tkcanvas.pack()
@@ -122,9 +126,10 @@ size_entry.place(x=145, y=112)
 size_entry_label = tk.Label(master=frame1, font=('Helvetica', 10), text='Size:', bg='grey')
 size_entry_label.place(x=90, y=110)
 
+global search
 
 def searchffi():
-    global search_ffi, ffi_data
+    global search, search_ffi, ffi_data
     search_ffi = lk.search_tesscut(obj_name_entered.get())
     # search_tpf = lk.search_targetpixelfile(obj_name_entered.get())
     # search_lcf = lk.search_lightcurve('V523 Cas')
@@ -143,6 +148,29 @@ def searchffi():
     sector_num = ttk.Combobox(frame1, value=nums, width=3)
     sector_num.insert(0, 0)
     sector_num.place(x=150, y=82)
+    search = 'ffi'
+
+
+def searchtpf():
+    global search, search_tpf, tpf_data
+    search_tpf = lk.search_targetpixelfile(obj_name_entered.get())
+
+    T.insert(INSERT, 'SearchResult for ' + obj_name_entered.get() + '\n')
+    T.insert(INSERT, search_tpf)
+    # T.insert(INSERT, '\n')
+    T.insert(INSERT, '\n--------------------------------------------------------------')
+    T.insert(INSERT, '\n')
+    T.see(tk.END)
+
+    found_sectors = len(search_tpf)
+    nums = []
+    for i in range(0, found_sectors):
+        nums.append(i)
+    global sector_num
+    sector_num = ttk.Combobox(frame1, value=nums, width=3)
+    sector_num.insert(0, 0)
+    sector_num.place(x=150, y=82)
+    search = 'tpf'
 
 
 coordinates_label = tk.Label(master=frame1, font=('Helvetica', 10), text='Frame position:', bg='grey')
@@ -159,19 +187,28 @@ ra_output_label.place(x=10, y=275)
 
 def plot_ffi():
     plt.close()
-    global search_ffi, target_mask, ffi_plot, ffi_data, output_window, ax, plotwidth, plotheight
-    ffi_data = search_ffi[int(sector_num.get())].download(cutout_size=int(size_entry.get()))
-    # ffi_data.show_properties()
-    plotwidth = ffi_data.column - 0.5
-    plotheight = ffi_data.row - 0.5
+    global search, search_ffi, target_mask, ffi_plot, ffi_data, tpf_data, output_window, ax, plotwidth, plotheight
 
-    dec_output.delete(0, END)
-    dec_output.insert(0, str(round(ffi_data.dec, 6)))
-    ra_output.delete(0, END)
-    ra_output.insert(0, str(round(ffi_data.ra, 6)))
-
-    target_mask = ffi_data.create_threshold_mask(threshold=threshold_entry.get(), reference_pixel='center')
-
+    if search == 'ffi':
+        ffi_data = search_ffi[int(sector_num.get())].download(cutout_size=int(size_entry.get()))
+        # ffi_data.show_properties()
+        target_mask = ffi_data.create_threshold_mask(threshold=threshold_entry.get(), reference_pixel='center')
+        plotwidth = ffi_data.column - 0.5
+        plotheight = ffi_data.row - 0.5
+        dec_output.delete(0, END)
+        dec_output.insert(0, str(round(ffi_data.dec, 6)))
+        ra_output.delete(0, END)
+        ra_output.insert(0, str(round(ffi_data.ra, 6)))
+    elif search == 'tpf':
+        tpf_data = search_tpf[int(sector_num.get())].download()
+        # tpf_data.show_properties()
+        target_mask = tpf_data.create_threshold_mask(threshold=threshold_entry.get(), reference_pixel='center')
+        plotwidth = tpf_data.column - 0.5
+        plotheight = tpf_data.row - 0.5
+        dec_output.delete(0, END)
+        dec_output.insert(0, str(round(tpf_data.dec, 6)))
+        ra_output.delete(0, END)
+        ra_output.insert(0, str(round(tpf_data.ra, 6)))
     create_output_window()
     embed_plot('r')
 
@@ -184,10 +221,13 @@ def plot_ffi():
 def plot_ffi_update():
     global ffi_plot, ax
     global target_mask
-    global output_window
+    global output_window, search
     plt.close()
 
-    target_mask = ffi_data.create_threshold_mask(threshold=threshold_entry.get(), reference_pixel='center')
+    if search == 'ffi':
+        target_mask = ffi_data.create_threshold_mask(threshold=threshold_entry.get(), reference_pixel='center')
+    if search == 'tpf':
+        target_mask =tpf_data.create_threshold_mask(threshold=threshold_entry.get(), reference_pixel='center')
 
     create_output_window()
     embed_plot('r')
@@ -198,13 +238,17 @@ def plot_ffi_update():
 
 def makeownmask():
     global target_mask
-    global output_window
+    global output_window, search
     plt.close()
 
-    target_mask = ffi_data.create_threshold_mask(threshold=1000, reference_pixel='center')
-
-    create_output_window()
-    embed_plot('#0000FF')
+    if search == 'ffi':
+        target_mask = ffi_data.create_threshold_mask(threshold=1000, reference_pixel='center')
+        create_output_window()
+        embed_plot('#0000FF')
+    elif search == 'tpf':
+        target_mask = tpf_data.create_threshold_mask(threshold=1000, reference_pixel='center')
+        create_output_window()
+        embed_plot('#0000FF')
     plt.gcf().canvas.mpl_connect('button_press_event', setmaskpixel)
     # canvas.get_tk_widget().pack()
     # toolbar = NavigationToolbar2Tk(canvas, output_window)
@@ -217,7 +261,7 @@ makeownmask_button.place(x=200, y=110)
 
 def setmaskpixel(event):
     global target_mask
-    global output_window
+    global output_window, search
     ix, iy = event.xdata, event.ydata
     # print(f'x = {ix}, y = {iy}')
     mask_y = int((ix - plotwidth)//1)
@@ -230,7 +274,10 @@ def setmaskpixel(event):
     plt.close()
 
     create_output_window()
-    embed_plot('#0000FF')
+    if search == 'ffi':
+        embed_plot('#0000FF')
+    elif search == 'tpf':
+        embed_plot('#0000FF')
     plt.gcf().canvas.mpl_connect('button_press_event', setmaskpixel)
     # canvas.get_tk_widget().pack()
     # toolbar = NavigationToolbar2Tk(canvas, output_window)
@@ -238,22 +285,36 @@ def setmaskpixel(event):
 
 
 def plot_curve():
-    global ffi_lc
+    global ffi_lc, tpf_lc, search
     plt.close()
-    ffi_lc = ffi_data.to_lightcurve(aperture_mask=target_mask)
-    ffi_lc.plot(label="SAP FFI")
+    if search == 'ffi':
+        ffi_lc = ffi_data.to_lightcurve(aperture_mask=target_mask)
+        ffi_lc.plot(label="SAP FFI")
+    elif search == 'tpf':
+        tpf_lc = tpf_data.to_lightcurve(aperture_mask=target_mask)
+        tpf_lc.plot(label="SAP TPF")
+
     plt.show()
 
 
 def save_curve():
-    # global ffi_lc
-    txtcurve = str(obj_name.get()) + '_ffi.txt'
-    file = open(txtcurve, 'w')
-    print(ffi_lc)
-    for row in ffi_lc:
-        line = str(row['time']) + ' ' + str(row['flux'].value) + ' ' + str(row['flux_err'].value) + '\n'
-        file.write(line)
-    file.close()
+    global ffi_lc, tpf_lc
+    if search == 'ffi':
+        txtcurve = str(obj_name.get()) + '_ffi.txt'
+        file = open(txtcurve, 'w')
+        for row in ffi_lc:
+            line = str(row['time']) + ' ' + str(row['flux'].value) + ' ' + str(row['flux_err'].value) + '\n'
+            file.write(line)
+        file.close()
+    if search == 'tpf':
+        txtcurve = str(obj_name.get()) + '_tpf.txt'
+        file = open(txtcurve, 'w')
+        for row in tpf_lc:
+            line = str(row['time']) + ' ' + str(row['flux'].value) + ' ' + str(row['flux_err'].value) + '\n'
+            file.write(line)
+        file.close()
+    T.insert(INSERT, 'Lightcurve saved to ' + txtcurve + '\n')
+    T.see(tk.END)
 
 
 threshold_entry = tk.Spinbox(master=frame1, from_=1, to=200, increment=1,
@@ -265,10 +326,13 @@ threshold_label.place(x=280, y=80)
 searchffi_button = ttk.Button(frame1, text='Search FFI', command=searchffi)
 searchffi_button.place(x=10, y=80)
 
-plotffi_button = ttk.Button(frame1, text='Plot FFI', command=plot_ffi)
+searchtpf_button = ttk.Button(frame1, text='Search TPF', command=searchtpf)
+searchtpf_button.place(x=10, y=110)
+
+plotffi_button = ttk.Button(frame1, text='Plot FFI/TPF', command=plot_ffi)
 plotffi_button.place(x=200, y=80)
 
-updateffi_button = ttk.Button(frame1, text='Update FFI', command=plot_ffi_update)
+updateffi_button = ttk.Button(frame1, text='Update Plot', command=plot_ffi_update)
 updateffi_button.place(x=405, y=80)
 
 plotcurve_button = ttk.Button(frame1, text='Plot Curve', command=plot_curve)
