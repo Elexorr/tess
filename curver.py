@@ -186,7 +186,7 @@ ra_output_label.place(x=10, y=275)
 
 
 def plot_ffi():
-    plt.close()
+    # plt.close()
     global search, search_ffi, target_mask, ffi_plot, ffi_data, tpf_data, output_window, ax, plotwidth, plotheight
 
     if search == 'ffi':
@@ -239,7 +239,7 @@ def plot_ffi_update():
 def makeownmask():
     global target_mask
     global output_window, search
-    plt.close()
+    # plt.close()
 
     if search == 'ffi':
         target_mask = ffi_data.create_threshold_mask(threshold=1000, reference_pixel='center')
@@ -289,25 +289,24 @@ def plot_curve():
     plt.close()
     if search == 'ffi':
         ffi_lc = ffi_data.to_lightcurve(aperture_mask=target_mask)
-        ffi_lc.plot(label="SAP FFI")
+        lightcurve = ffi_lc.plot(label="SAP FFI")
     elif search == 'tpf':
         tpf_lc = tpf_data.to_lightcurve(aperture_mask=target_mask)
-        tpf_lc.plot(label="SAP TPF")
-
+        lightcurve = tpf_lc.plot(label="SAP TPF")
     plt.show()
 
 
 def save_curve():
     global ffi_lc, tpf_lc
     if search == 'ffi':
-        txtcurve = str(obj_name.get()) + '_ffi.txt'
+        txtcurve = str(obj_name.get()) + ' #' + sector_num.get() + '_ffi.txt'
         file = open(txtcurve, 'w')
         for row in ffi_lc:
             line = str(row['time']) + ' ' + str(row['flux'].value) + ' ' + str(row['flux_err'].value) + '\n'
             file.write(line)
         file.close()
     if search == 'tpf':
-        txtcurve = str(obj_name.get()) + '_tpf.txt'
+        txtcurve = str(obj_name.get()) + ' #' + sector_num.get() + '_tpf.txt'
         file = open(txtcurve, 'w')
         for row in tpf_lc:
             line = str(row['time']) + ' ' + str(row['flux'].value) + ' ' + str(row['flux_err'].value) + '\n'
