@@ -17,6 +17,7 @@ from astroquery.mast import Catalogs
 import csv
 from PIL import Image,ImageTk
 from astropy.modeling import models, fitting
+from astropy.modeling.fitting import Fitter
 import csvtodat
 import requests
 import pandas as pd
@@ -79,6 +80,7 @@ sector_num.place(x=340, y=8)
 
 
 def basic_search():
+    fromfile = False
     global fitted
     fitted = False # Nebude vykreslovat poslednu zobrazenu krivku ale nanovo
     clear_JD() # Vymaze policka na ohranicovanie krivky
@@ -164,8 +166,6 @@ def opencurvefile():
         else:
             filey.append(float(lines[i].split(' ')[1]))
 
-    for i in range(0, len(filex)):
-        print(filex[i], filey[i])
 
     fromfile = True
 
@@ -229,9 +229,9 @@ def curve_plot():
         # for i in range(0,10):
         #     print(y[i])
 
-        T.insert(INSERT, '\n')
-        T.insert(INSERT, 'Data sample: ' + str(x[0]) + ' ' + str(y[0]))
-        T.see(tk.END)
+        # T.insert(INSERT, '\n')
+        # T.insert(INSERT, 'Data sample: ' + str(x[0]) + ' ' + str(y[0]))
+        # T.see(tk.END)
 
         if y[1] > 20:
             divisor = 100000
@@ -393,8 +393,14 @@ def fitprocessing():
         g_init = models.Gaussian1D(amplitude=magscale, mean=fxx[len(fxx) // 2], stddev=sd)
         print('amplitude:', magscale, 'mean:', str(fxx[len(fxx) // 2]), 'stdev:', sd)
         fit_g = fitting.LevMarLSQFitter()
+        # fitted_g = fit_g(g_init, fxx, invyy)
         fitted_g = fit_g(g_init, fxx, invyy)
-        print(fitted_g)
+        # print('Fit info:\n', fit_g.fit_info['param_cov'])
+        paramcov = fit_g.fit_info['param_cov']
+        mean_error = np.sqrt(paramcov[1][1])
+        print(mean_error)
+
+        # print(fitted_g.mean)
         # fitted_g = fit_g(g_init, fxx, fyy)
 
         for i in range (0, len(fxx)):
@@ -404,8 +410,17 @@ def fitprocessing():
         GTmin = round(fitted_g.mean.value, 7)
         print('Tmin (Gaussian): ', GTmin)
         T.insert(INSERT, '\n')
-        T.insert(INSERT, 'Tmin (Gaussian): ' + str(GTmin))
+        T.insert(INSERT, 'Tmin (Gaussian): ' + str(GTmin) + '(' + str(mean_error) + ')')
         T.see(tk.END)
+
+
+        # if isinstance(fit_g, Fitter) and fit_g.fit_info['param_cov'] is not None:
+        #     param_cov = fit_g.fit_info['param_cov']
+        #     mean_error = np.sqrt(param_cov[1][1])  # Chyba pre parameter 'mean'
+        #     print(f"Chyba strednej hodnoty (mean): {mean_error}")
+        # else:
+        #     print("Kovariančná matica nie je k dispozícii.")
+
 
     if Lorentzian.get() == 1:  # fitting and drawing Lorentzian model
         locmin = Maxmagvalue
