@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import *
 from tkinter import ttk
 from tkinter.messagebox import showinfo
+from tkinter import filedialog as fd
 import os
 import lightkurve as lk
 import numpy as np
@@ -133,8 +134,69 @@ global xx
 global yy
 
 
-global fitted
+global fitted, fromfile
 fitted = False
+fromfile = False
+
+
+def opencurvefile():
+    clear_JD()
+    global filex
+    global filey
+    global fromfile
+    file_path = fd.askopenfilename(filetypes=(("Data files", "*.dat"), ("All files", "*.*")))
+    f = open(file_path, 'r')
+    lines = f.readlines()
+    filex = []    #cas
+    filey = []    #jasnost
+
+    # for line in lines:
+    #     filex.append(float(line.split(' ')[0]))
+    #     filey.append(float(line.split(' ')[1]))
+
+    for i in range(1, len(lines)):
+        if float(lines[i].split(' ')[0]) > 2457000:
+            filex.append(float(lines[i].split(' ')[0])-2457000) ## -2457000
+        else:
+            filex.append(float(lines[i].split(' ')[0]))
+        if 5 < float(lines[i].split(' ')[1]) < 20:
+            filey.append(float(lines[i].split(' ')[1])/10-1)
+        else:
+            filey.append(float(lines[i].split(' ')[1]))
+
+    for i in range(0, len(filex)):
+        print(filex[i], filey[i])
+
+    fromfile = True
+
+    # if file_path:
+    #     with f:
+    #         lines = f.readlines()
+    #
+    #         # Definicia premennych casovej serie
+    #         x = []     #cas
+    #         y = []    #jasnost
+    #         # err = []    #chyba merania
+    #
+    #         # Ulozenie hodnot do casovej serie
+    #         for i in range (0, len(lines)):
+    #              if lines[i][16:18] != '99':
+    #                  x.append(float(lines[i][0:16]))
+    #                  y.append(float(lines[i][19:27]))
+
+
+
+                 #     if(lines[i][16]) == '-':
+                 #         mag.append(1+float(lines[i][16:24]))
+                 #         err.append(float(lines[i][25:32]))
+                 #     else:
+                 #         mag.append(1+float(lines[i][16:23]))
+                 #         err.append(float(lines[i][24:31]))
+                 # else:
+                 #       pass
+
+open_file_button = ttk.Button(frame1, text='Open File', command=opencurvefile)
+open_file_button.place(x=10, y=100)
 
 def curve_plot():
     global fitted
@@ -143,8 +205,9 @@ def curve_plot():
     global window
     global canvas
     global ax
-    global x
-    global y
+    global x, filex
+    global y, filey
+    global fromfile
     global xx
     global yy
 
@@ -154,8 +217,12 @@ def curve_plot():
     if fitted == False:
         # print(lcf)
 
-        x = lcf[int(sector_num.get())].time.value
-        y = lcf[int(sector_num.get())].flux.value
+        if fromfile == True:
+            x = filex
+            y = filey
+        else:
+            x = lcf[int(sector_num.get())].time.value
+            y = lcf[int(sector_num.get())].flux.value
 
 
         print('Hello')
@@ -166,7 +233,7 @@ def curve_plot():
         T.insert(INSERT, 'Data sample: ' + str(x[0]) + ' ' + str(y[0]))
         T.see(tk.END)
 
-        if y[1] > 10:
+        if y[1] > 20:
             divisor = 100000
             result = [(a / divisor - 2) for a in y]
             y = result
@@ -320,12 +387,14 @@ def fitprocessing():
 
     if Gaussian.get() == 1:  # fitting and drawing Gaussian model
         sd = (fend - fstart) / 4
+        print('stdev:', sd)
         # sd = np.sqrt(np.sum((fxx - fxx[len(fxx) // 2]) ** 2) / (len(fxx) - 1))
         # stddev = np.sqrt(np.sum((orig_wavelength - an_mean) ** 2) / (len(orig_wavelength) - 1))
         g_init = models.Gaussian1D(amplitude=magscale, mean=fxx[len(fxx) // 2], stddev=sd)
         print('amplitude:', magscale, 'mean:', str(fxx[len(fxx) // 2]), 'stdev:', sd)
         fit_g = fitting.LevMarLSQFitter()
         fitted_g = fit_g(g_init, fxx, invyy)
+        print(fitted_g)
         # fitted_g = fit_g(g_init, fxx, fyy)
 
         for i in range (0, len(fxx)):
@@ -470,6 +539,7 @@ with open('kepler.csv', newline='') as csvfile:
     for row in rowz:
         kic_ids.append(row['#KIC'])
     kic_ids = sorted(kic_ids)
+
 
 kic_label = tk.Label(master=frame1, font=('Helvetica', 10), text='KIC ID:', bg='grey')
 kic_label.place(x=5, y=250)
