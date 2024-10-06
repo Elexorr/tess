@@ -187,11 +187,15 @@ ra_output_label.place(x=10, y=275)
 
 def plot_ffi():
     # plt.close()
-    global search, search_ffi, target_mask, ffi_plot, ffi_data, tpf_data, output_window, ax, plotwidth, plotheight
+    global search, sect, search_ffi, target_mask, ffi_plot, ffi_data, tpf_data, output_window, ax, plotwidth, plotheight
 
     if search == 'ffi':
         ffi_data = search_ffi[int(sector_num.get())].download(cutout_size=int(size_entry.get()))
+
+        sect = ffi_data.sector
+        print('sector: ', sect)
         # ffi_data.show_properties()
+
         target_mask = ffi_data.create_threshold_mask(threshold=threshold_entry.get(), reference_pixel='center')
         plotwidth = ffi_data.column - 0.5
         plotheight = ffi_data.row - 0.5
@@ -297,16 +301,18 @@ def plot_curve():
 
 
 def save_curve():
-    global ffi_lc, tpf_lc
+    global ffi_lc, tpf_lc, sect
     if search == 'ffi':
-        txtcurve = str(obj_name.get()) + ' #' + sector_num.get() + '_ffi.txt'
+        # txtcurve = str(obj_name.get()) + ' #' + sector_num.get() + '_ffi.txt'
+        txtcurve = str(obj_name.get()) +  '_#' + sector_num.get() + '_s' + str(sect) + '_' + 'ffi.txt'
         file = open(txtcurve, 'w')
         for row in ffi_lc:
             line = str(row['time']) + ' ' + str(row['flux'].value) + ' ' + str(row['flux_err'].value) + '\n'
             file.write(line)
         file.close()
     if search == 'tpf':
-        txtcurve = str(obj_name.get()) + ' #' + sector_num.get() + '_tpf.txt'
+        # txtcurve = str(obj_name.get()) + ' #' + sector_num.get() + '_tpf.txt'
+        txtcurve = str(obj_name.get()) +  '_#' + sector_num.get() + '_s' + str(sect) + '_' + 'tpf.txt'
         file = open(txtcurve, 'w')
         for row in tpf_lc:
             line = str(row['time']) + ' ' + str(row['flux'].value) + ' ' + str(row['flux_err'].value) + '\n'
