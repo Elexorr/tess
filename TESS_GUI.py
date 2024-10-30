@@ -145,10 +145,18 @@ def opencurvefile():
     clear_JD()
     global filex
     global filey
-    global fromfile
-    file_path = fd.askopenfilename(filetypes=(("Data files", "*.dat"), ("All files", "*.*")))
+    global fromfile, file_name, f, lines
+
+    file_path = fd.askopenfilename(filetypes=(("Text files", "*.txt"), ("All files", "*.*")))
+    print(file_path)
+
+    file_name = os.path.basename(file_path)
+    print(file_name)
+
     f = open(file_path, 'r')
+
     lines = f.readlines()
+
     filex = []    #cas
     filey = []    #jasnost
 
@@ -524,7 +532,7 @@ def save_curve():
     global lcf
     txtcurve = str(obj_name.get()) + '_selection_tess.txt'
     file = open(txtcurve, 'w')
-    print(lcf[int(sector_num.get())])
+    # print(lcf[int(sector_num.get())])
     # fluxcoef = int(exptime_selection.get())/1800
     for row in lcf[int(sector_num.get())]:
         if JDstart < float(str(row['time'].value)) < JDend:
@@ -540,8 +548,33 @@ def save_curve():
     file.close()
 
 
+def save_cutted():
+    print('spustam ukladanie')
+    global file_name, lines
+    # for row in lines:
+    #     print(row)
+    if JDstart_entered.get() != '':
+        JDstart = float(JDstart_entered.get())
+        JDend = float(JDend_entered.get())
+    else:
+        JDstart = 0
+        JDend = 1000000
+    cuttedcurve = 'cut_' + file_name
+    filecutted = open(cuttedcurve, 'a')
+    for row in lines:
+
+        if JDstart < float(row.split()[0]) < JDend:
+            print(row)
+            print(float(row.split()[0]))
+            filecutted.write(str(row))
+    filecutted.close()
+
+
 save_curve_button = ttk.Button(frame1, text='Save Curve', command=save_curve)
 save_curve_button.place(x=400, y=87)
+
+save_cutted_button = ttk.Button(frame1, text='Save Cutted', command=save_cutted)
+save_cutted_button.place(x=400, y=117)
 
 
 kepler_label = tk.Label(master=frame1, font=('Helvetica', 10), text='Kepler Eclipsing Binary Catalog', bg='grey')
