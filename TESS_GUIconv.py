@@ -107,6 +107,7 @@ basic_search_button.place(x=220, y=5)
 def refined_search():
     global lcf
     search_lcf_refined = lk.search_lightcurve(obj_name.get(), author=str(author_selection.get()), exptime=int(exptime_selection.get()))
+
     T.insert(INSERT, '\n')
     T.insert(INSERT, search_lcf_refined)
     T.see(tk.END)
@@ -121,6 +122,8 @@ def refined_search():
     sector_num.place(x=340, y=8)
     if len(search_lcf_refined.table) != 0:
         lcf = search_lcf_refined.download_all()
+        fits_file = lcf[1].hdu
+        print(fits_file)
 
 
 refined_search_button = ttk.Button(frame1, text='Refined Search', command=refined_search)
@@ -243,10 +246,9 @@ def curve_plot():
         # y = -2.5 * np.log10(y)
 
         # Normalizácia na strednú hodnotu flux a na relativnu magnitudu
-        mean_y = np.nanmean(y)  # nanmean ignoruje NaN hodnoty
+        mean_y = np.nanmax(y)  # nanmean ignoruje NaN hodnoty
         y = (y / mean_y)
         y = -(2.5 * np.log10(y))
-
 
         print(y)
 
@@ -316,7 +318,7 @@ def curve_plot():
     fig = plt.Figure(figsize=(figx, figy), dpi = 100)
     ax = fig.add_subplot(111)
     ax.set_xlabel('Time [BJD]')
-    ax.set_ylabel('Normalized magnitude')
+    ax.set_ylabel('Relative magnitude')
     ax.invert_yaxis()
     ax.plot(xx, yy, 'b', marker='o', linestyle='dashed', linewidth=1, markersize=4)
     # EXPERIMENTAL ROWS TO ADD FIT CURVE / ked bude treba
@@ -474,7 +476,7 @@ def fitprocessing():
     ax = fig.add_subplot(111)
     # ax.plot(xx, yy, 'b', fxx, fitt, 'r', marker='o', linestyle='dashed', linewidth=1, markersize=4)
     ax.set_xlabel('Time [BJD]')
-    ax.set_ylabel('Normalized magnitude')
+    ax.set_ylabel('Relative magnitude')
     ax.invert_yaxis()
     ax.plot(xx, yy, 'b', marker='o', linestyle='dashed', linewidth=1, markersize=4)
 

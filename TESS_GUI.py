@@ -152,6 +152,9 @@ def opencurvefile():
 
     file_name = os.path.basename(file_path)
     print(file_name)
+    T.insert(INSERT, '\n')
+    T.insert(INSERT, 'Opened file ' + file_name)
+    T.see(tk.END)
 
     f = open(file_path, 'r')
 
@@ -348,9 +351,9 @@ def clear_JD():
 Gaussian = IntVar()
 Lorentzian = IntVar()
 checkboxGauss = tk.Checkbutton(master=frame1, text=' Gaussian', variable=Gaussian, onvalue=1, offvalue=0, bg="grey")
-checkboxGauss.place(x=395, y=120)
+checkboxGauss.place(x=395, y=170)
 checkboxLorentz = tk.Checkbutton(master=frame1, text=' Lorentzian', variable=Lorentzian, onvalue=1, offvalue=0, bg="grey")
-checkboxLorentz.place(x=395, y=140)
+checkboxLorentz.place(x=395, y=190)
 
 def fitprocessing():
     global ax
@@ -483,7 +486,7 @@ def fitprocessing():
 
 
 fit_button = ttk.Button(frame1, text='Fit Selection', width = 11, command=fitprocessing)
-fit_button.place(x=400, y=170)
+fit_button.place(x=400, y=220)
 
 clear_JD_button = ttk.Button(frame1, text='CLR', width = 4, command=clear_JD)
 clear_JD_button.place(x=220, y=75)
@@ -567,6 +570,9 @@ def save_cutted():
             print(row)
             print(float(row.split()[0]))
             filecutted.write(str(row))
+    T.insert(INSERT, '\n')
+    T.insert(INSERT, 'Saved file ' + cuttedcurve)
+    T.see(tk.END)
     filecutted.close()
 
 
