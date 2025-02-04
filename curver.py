@@ -1,6 +1,8 @@
 import tkinter as tk
 from tkinter import *
 from tkinter import ttk
+import astropy.units as u
+
 import numpy as np
 import csv
 import requests
@@ -287,13 +289,30 @@ def setmaskpixel(event):
     # toolbar = NavigationToolbar2Tk(canvas, output_window)
     # toolbar.update()
 
+bkgstatus = IntVar()
+checkbox_bkg = tk.Checkbutton(master=frame1, text='Subtract BKG', variable=bkgstatus, onvalue=1, offvalue=0, bg="grey")
+checkbox_bkg.place(x=200, y=200)
 
 def plot_curve():
-    global ffi_lc, tpf_lc, search
+    global ffi_lc, tpf_lc, search, bkgstatus
     plt.close()
     if search == 'ffi':
         ffi_lc = ffi_data.to_lightcurve(aperture_mask=target_mask)
         lightcurve = ffi_lc.plot(label="SAP FFI")
+
+        # ffi_lc_flat = ffi_lc.flatten(window_length=101)
+        # ffi_lc_flat.plot(label=f"window_length=101")
+
+        if bkgstatus.get() == 1:
+            quality_mask = ffi_lc['quality'] == 0  # mask by TESS quality
+            ffi_lc = ffi_lc[quality_mask]
+            bkg = ffi_data.estimate_background(aperture_mask='background')
+            ffi_lc.flux = ffi_lc.flux - bkg.flux[quality_mask] * target_mask.sum() * u.pix
+            lightcurve_bkg = ffi_lc.plot(label="bkg")
+            ffi_lc_flat = ffi_lc.flatten(window_length=101)
+            ffi_lc_flat.plot(label=f"window_length=101")
+
+
     elif search == 'tpf':
         tpf_lc = tpf_data.to_lightcurve(aperture_mask=target_mask)
         lightcurve = tpf_lc.plot(label="SAP TPF")

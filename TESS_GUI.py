@@ -20,7 +20,7 @@ from astropy.modeling import models, fitting
 from astropy.modeling.fitting import Fitter
 import csvtodat
 import requests
-import pandas as pd
+# import pandas as pd
 
 
 root = tk.Tk()
