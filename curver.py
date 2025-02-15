@@ -314,9 +314,8 @@ def plot_curve():
 
         fig, axes = plt.subplots(2, 2, figsize=(12, 8), sharex=True)
         fig.canvas.manager.set_window_title(obj_name_entered.get())
-        # fig.suptitle(obj_name_entered.get(), fontsize=16)
+        fig.suptitle(obj_name_entered.get() + " correction", fontsize=16)
 
-        # ffi_lc.plot(ax=axes[0, 0], label="SAP FFI")
         lightcurve = ffi_lc.plot(ax=axes[0, 0], label="SAP FFI")
 
         if bkgstatus.get() == 1:
@@ -324,9 +323,17 @@ def plot_curve():
             ffi_lc = ffi_lc[quality_mask]
             bkg = ffi_data.estimate_background(aperture_mask='background')
             ffi_lc.flux = ffi_lc.flux - bkg.flux[quality_mask] * target_mask.sum() * u.pix
-            lightcurve_bkg = ffi_lc.plot(ax=axes[0, 1], label="bkg")
+            lightcurve_bkg = ffi_lc.plot(ax=axes[0, 1], label="BKG Subtracted")
         if regstatus.get() == 1:
-            dm = DesignMatrix({'time': ffi_lc.time.value, 'time^2': ffi_lc.time.value ** 2, 'time^3': ffi_lc.time.value ** 3})
+            polyndeg = int(polynomial_degree_entry.get())
+            if polyndeg == 1:
+                dm = DesignMatrix({'time': ffi_lc.time.value})
+            if polyndeg == 2:
+                dm = DesignMatrix({'time': ffi_lc.time.value, 'time^2': ffi_lc.time.value ** 2})
+            if polyndeg == 3:
+                dm = DesignMatrix({'time': ffi_lc.time.value, 'time^2': ffi_lc.time.value ** 2, 'time^3': ffi_lc.time.value ** 3})
+            if polyndeg == 4:
+                dm = DesignMatrix({'time': ffi_lc.time.value, 'time^2': ffi_lc.time.value ** 2, 'time^3': ffi_lc.time.value ** 3, 'time^4': ffi_lc.time.value ** 4})
             corrector = RegressionCorrector(ffi_lc)
             ffi_lc_corrected = corrector.correct(dm)
             lightcurve_reg = ffi_lc_corrected.plot(ax=axes[1, 0], label="RegressionCorrector", color="red")
@@ -335,8 +342,6 @@ def plot_curve():
             ffi_lc_flat = ffi_lc_corrected.flatten(window_length=int(window_length_entry.get()))
             print(ffi_lc_flat)
             lightcurve_flatten = ffi_lc_flat.plot(ax=axes[1, 1], label="flatten w_l= "+window_length_entry.get())
-
-
 
     elif search == 'tpf':
         tpf_lc = tpf_data.to_lightcurve(aperture_mask=target_mask)
