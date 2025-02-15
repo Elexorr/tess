@@ -301,6 +301,8 @@ checkbox_flt = tk.Checkbutton(master=frame1, text='Flatten', variable=flatstatus
 checkbox_flt.place(x=200, y=210)
 window_length_entry = tk.Spinbox(master=frame1, from_=11, to=1001, increment=10, justify=CENTER, width=5)
 window_length_entry.place(x=280, y=212)
+polynomial_degree_entry = tk.Spinbox(master=frame1, from_=1, to=4, increment=1, justify=CENTER, width=5)
+polynomial_degree_entry.place(x=350, y=188)
 checkbox_reg = tk.Checkbutton(master=frame1, text='Regression Corrector', variable=regstatus, onvalue=1, offvalue=0, bg="grey")
 checkbox_reg.place(x=200, y=185)
 
@@ -309,31 +311,41 @@ def plot_curve():
     plt.close()
     if search == 'ffi':
         ffi_lc = ffi_data.to_lightcurve(aperture_mask=target_mask)
-        lightcurve = ffi_lc.plot(label="SAP FFI")
+
+        fig, axes = plt.subplots(2, 2, figsize=(10, 4), sharex=True, sharey=True)
+
+        ffi_lc.plot(ax=axes[0], label="SAP FFI")
+        # lightcurve = ffi_lc.plot(ax=axes[0], label="SAP FFI")
 
         # ffi_lc_flat = ffi_lc.flatten(window_length=101)
         # ffi_lc_flat.plot(label=f"window_length=101")
+
+
 
         if bkgstatus.get() == 1:
             quality_mask = ffi_lc['quality'] == 0  # mask by TESS quality
             ffi_lc = ffi_lc[quality_mask]
             bkg = ffi_data.estimate_background(aperture_mask='background')
             ffi_lc.flux = ffi_lc.flux - bkg.flux[quality_mask] * target_mask.sum() * u.pix
-            lightcurve_bkg = ffi_lc.plot(label="bkg")
+            ffi_lc.plot(ax=axes[1], label="bkg")
+            # lightcurve_bkg = ffi_lc.plot(ax=axes[1], label="bkg")
         if regstatus.get() == 1:
             dm = DesignMatrix({'time': ffi_lc.time.value, 'time^2': ffi_lc.time.value ** 2, 'time^3': ffi_lc.time.value ** 3})
             corrector = RegressionCorrector(ffi_lc)
             ffi_lc_corrected = corrector.correct(dm)
-            ffi_lc_corrected.plot(label="RegressionCorrector", color="red")
+            ffi_lc_corrected.plot(ax=axes[2], label="RegressionCorrector", color="red")
+            # lightcurve_reg = ffi_lc_corrected.plot(ax=axes[2], label="RegressionCorrector", color="red")
         if flatstatus.get() == 1:
             ffi_lc_flat = ffi_lc.flatten(window_length=int(window_length_entry.get()))
-            ffi_lc_flat.plot(label="flatten w_l= "+window_length_entry.get())
+            ffi_lc_flat.plot(ax=axes[3], label="flatten w_l= " + window_length_entry.get())
+            # lightcurve_flatten = ffi_lc_flat.plot(ax=axes[3], label="flatten w_l= "+window_length_entry.get())
             # ffi_lc_flat.plot(label="flatten w_l=101")
 
 
     elif search == 'tpf':
         tpf_lc = tpf_data.to_lightcurve(aperture_mask=target_mask)
         lightcurve = tpf_lc.plot(label="SAP TPF")
+    plt.tight_layout()
     plt.show()
 
 
