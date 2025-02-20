@@ -18,7 +18,11 @@ root = tk.Tk()
 root.title('TESS FFI curver 0.1')
 root.resizable(False, False)
 root.configure(bg='white')
+width = 542
+height = 506
+root.geometry(f"{width}x{height}+0+0")
 frame1 = tk.Frame(master=root, width=542, height=506, bg='grey')
+
 frame1.grid(row=0, column=0, sticky='N')
 T = Text(master=frame1, height=12, width=63, bg='Light grey', bd=3, padx=10)
 T.place(x=5, y=300)
@@ -219,6 +223,9 @@ def plot_ffi():
         ra_output.delete(0, END)
         ra_output.insert(0, str(round(tpf_data.ra, 6)))
     create_output_window()
+    width = 1170
+    height = 506
+    root.geometry(f"{width}x{height}+0+0")
     embed_plot('r')
 
     plt.close()
@@ -314,7 +321,7 @@ def plot_curve():
 
         fig, axes = plt.subplots(2, 2, figsize=(12, 8), sharex=True)
         fig.canvas.manager.set_window_title(obj_name_entered.get())
-        fig.suptitle(obj_name_entered.get() + " correction", fontsize=16)
+        fig.suptitle('FFI ' + obj_name_entered.get() + " correction", fontsize=16)
 
         lightcurve = ffi_lc.plot(ax=axes[0, 0], label="SAP FFI")
 
@@ -345,7 +352,37 @@ def plot_curve():
 
     elif search == 'tpf':
         tpf_lc = tpf_data.to_lightcurve(aperture_mask=target_mask)
-        lightcurve = tpf_lc.plot(label="SAP TPF")
+
+        fig, axes = plt.subplots(2, 2, figsize=(12, 8), sharex=True)
+        fig.canvas.manager.set_window_title(obj_name_entered.get())
+        fig.suptitle('TPF ' + obj_name_entered.get() + " correction", fontsize=16)
+
+        lightcurve = tpf_lc.plot(ax=axes[0, 0], label="SAP TPF")
+
+        if bkgstatus.get() == 1:
+            quality_mask = tpf_lc['quality'] == 0  # mask by TESS quality
+            tpf_lc = tpf_lc[quality_mask]
+            bkg = tpf_data.estimate_background(aperture_mask='background')
+            tpf_lc.flux = tpf_lc.flux - bkg.flux[quality_mask] * target_mask.sum() * u.pix
+            lightcurve_bkg = tpf_lc.plot(ax=axes[0, 1], label="BKG Subtracted")
+        if regstatus.get() == 1:
+            polyndeg = int(polynomial_degree_entry.get())
+            if polyndeg == 1:
+                dm = DesignMatrix({'time': tpf_lc.time.value})
+            if polyndeg == 2:
+                dm = DesignMatrix({'time': tpf_lc.time.value, 'time^2': tpf_lc.time.value ** 2})
+            if polyndeg == 3:
+                dm = DesignMatrix({'time': tpf_lc.time.value, 'time^2': tpf_lc.time.value ** 2, 'time^3': tpf_lc.time.value ** 3})
+            if polyndeg == 4:
+                dm = DesignMatrix({'time': tpf_lc.time.value, 'time^2': tpf_lc.time.value ** 2, 'time^3': tpf_lc.time.value ** 3, 'time^4': tpf_lc.time.value ** 4})
+            corrector = RegressionCorrector(tpf_lc)
+            tpf_lc_corrected = corrector.correct(dm)
+            lightcurve_reg = tpf_lc_corrected.plot(ax=axes[1, 0], label="RegressionCorrector", color="red")
+        if flatstatus.get() == 1:
+            tpf_lc_flat = tpf_lc_corrected.flatten(window_length=int(window_length_entry.get()))
+            print(tpf_lc_flat)
+            lightcurve_flatten = tpf_lc_flat.plot(ax=axes[1, 1], label="flatten w_l= "+window_length_entry.get())
+
     plt.tight_layout()
     plt.show()
 
