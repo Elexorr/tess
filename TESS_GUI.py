@@ -315,6 +315,9 @@ def curve_plot():
     fig = plt.Figure(figsize=(figx, figy), dpi = 100)
     ax = fig.add_subplot(111)
     ax.plot(xx, yy, 'b', marker='o', linestyle='dashed', linewidth=1, markersize=4)
+    ax.set_xlabel('BJD-2457000', fontsize=20)
+    ax.set_ylabel('Normalizovaný tok', fontsize=20)
+    plt.xlabel('X-ová os')
     # EXPERIMENTAL ROWS TO ADD FIT CURVE / ked bude treba
     # ax = fig.add_subplot(111).plot(xx, yy, 'b', xx, zz, 'r', marker='o', linestyle='dashed',
     #  linewidth=1, markersize=4)
