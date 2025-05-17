@@ -301,17 +301,34 @@ def setmaskpixel(event):
 
 bkgstatus = IntVar()
 flatstatus = IntVar()
+outstatus = IntVar()
+remnanstatus = IntVar()
 regstatus = IntVar()
+fillstatus = IntVar()
 checkbox_bkg = tk.Checkbutton(master=frame1, text='Subtract BKG', variable=bkgstatus, onvalue=1, offvalue=0, bg="grey")
 checkbox_bkg.place(x=200, y=160)
-checkbox_flt = tk.Checkbutton(master=frame1, text='Flatten', variable=flatstatus, onvalue=1, offvalue=0, bg="grey")
-checkbox_flt.place(x=200, y=210)
-window_length_entry = tk.Spinbox(master=frame1, from_=11, to=1001, increment=10, justify=CENTER, width=5)
-window_length_entry.place(x=280, y=212)
-polynomial_degree_entry = tk.Spinbox(master=frame1, from_=1, to=4, increment=1, justify=CENTER, width=5)
-polynomial_degree_entry.place(x=350, y=188)
 checkbox_reg = tk.Checkbutton(master=frame1, text='Regression Corrector', variable=regstatus, onvalue=1, offvalue=0, bg="grey")
 checkbox_reg.place(x=200, y=185)
+polynomial_degree_entry = tk.Spinbox(master=frame1, from_=1, to=4, increment=1, justify=CENTER, width=5)
+polynomial_degree_entry.place(x=350, y=188)
+polynomial_degree_entry.delete(0,"end")
+polynomial_degree_entry.insert(0,3)
+checkbox_outliers = tk.Checkbutton(master=frame1, text='Remove Outliers', variable=outstatus, onvalue=1, offvalue=0, bg="grey")
+checkbox_outliers.place(x=200, y=210)
+sigma_entry = tk.Spinbox(master=frame1, from_=1, to=10, increment=1, justify=CENTER, width=5)
+sigma_entry.place(x=350, y=212)
+sigma_entry.delete(0,"end")
+sigma_entry.insert(0,5)
+checkbox_remnans = tk.Checkbutton(master=frame1, text='Remove NaNs', variable=remnanstatus, onvalue=1, offvalue=0, bg="grey")
+checkbox_remnans.place(x=200, y=235)
+checkbox_flt = tk.Checkbutton(master=frame1, text='Flatten', variable=flatstatus, onvalue=1, offvalue=0, bg="grey")
+checkbox_flt.place(x=200, y=260)
+window_length_entry = tk.Spinbox(master=frame1, from_=11, to=1001, increment=10, justify=CENTER, width=5)
+window_length_entry.place(x=280, y=263)
+window_length_entry.delete(0,"end")
+window_length_entry.insert(0,301)
+checkbox_fillgaps = tk.Checkbutton(master=frame1, text='Fill Gaps', variable=fillstatus, onvalue=1, offvalue=0, bg="grey")
+checkbox_fillgaps.place(x=360, y=260)
 
 def plot_curve():
     global ffi_lc, tpf_lc, search, bkgstatus
@@ -319,7 +336,7 @@ def plot_curve():
     if search == 'ffi':
         ffi_lc = ffi_data.to_lightcurve(aperture_mask=target_mask)
 
-        fig, axes = plt.subplots(2, 2, figsize=(12, 8), sharex=True)
+        fig, axes = plt.subplots(3, 2, figsize=(12, 8), sharex=True)
         fig.canvas.manager.set_window_title(obj_name_entered.get())
         fig.suptitle('FFI ' + obj_name_entered.get() + " correction", fontsize=16)
 
@@ -344,11 +361,19 @@ def plot_curve():
             corrector = RegressionCorrector(ffi_lc)
             ffi_lc_corrected = corrector.correct(dm)
             lightcurve_reg = ffi_lc_corrected.plot(ax=axes[1, 0], label="RegressionCorrector", color="red")
+        if outstatus.get() == 1:
+            ffi_lc_outlremoved = ffi_lc.remove_outliers(sigma=sigma_entry.get())
+            lightcurve_out = ffi_lc_outlremoved.plot(ax=axes[1, 1], label="Outliers Removed", color="brown")
+        if remnanstatus.get() == 1:
+            ffi_lc_outlremoved = ffi_lc_outlremoved.remove_nans()
         if flatstatus.get() == 1:
             print(ffi_lc_corrected)
-            ffi_lc_flat = ffi_lc_corrected.flatten(window_length=int(window_length_entry.get()))
+            ffi_lc_flat = ffi_lc_outlremoved.flatten(window_length=int(window_length_entry.get()))
             print(ffi_lc_flat)
-            lightcurve_flatten = ffi_lc_flat.plot(ax=axes[1, 1], label="flatten w_l= "+window_length_entry.get())
+            lightcurve_flatten = ffi_lc_flat.plot(ax=axes[2, 0], label="Flatten w_l= "+window_length_entry.get())
+        if fillstatus.get() == 1:
+            ffi_lc_flat = ffi_lc_flat.fill_gaps(method='gaussian_noise')
+            lightcurve_fill = ffi_lc_flat.plot(ax=axes[2, 1], label="Gaussian Noise")
 
     elif search == 'tpf':
         tpf_lc = tpf_data.to_lightcurve(aperture_mask=target_mask)

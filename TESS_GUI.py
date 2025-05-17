@@ -673,6 +673,7 @@ def find_tic():
         url = "http://keplerebs.villanova.edu/includes/" + "0" + kic_num + ".00.lc.pf.png"  # Vytvori url na stiahnutie
     else:  # obrazku dtr krivky
         url = "http://keplerebs.villanova.edu/includes/" + kic_num + ".00.lc.pf.png"  #
+    print(url)
     data = requests.get(url).content  # Stiahne obrazok dtr krivky
     file_name = "temp.png"  # Ulozi obrazok dtr krivky
     f = open("temp.png", 'wb')  # v prislusnom podadresari
@@ -724,8 +725,13 @@ def plot_phased():
         figy = (figx * 0.5625)
         fig = plt.Figure(figsize=(figx, figy), dpi = 100)
         #fig.add_subplot(111).plot(x, y, "ro")
-        fig.add_subplot(111).plot(x, y, color='blue', marker='o', linestyle='dashed',
-         linewidth=1, markersize=4)
+        # fig.add_subplot(111).plot(x, y, color='blue', marker='o', linestyle='dashed',
+        #  linewidth=1, markersize=4)
+        ax = fig.add_subplot(111)
+        ax.plot(x, y, color='blue', marker='o', linestyle='dashed', linewidth=1, markersize=4)
+        # ax.plot(xx, yy, 'b', marker='o', linestyle='dashed', linewidth=1, markersize=4)
+        ax.set_xlabel('Fáza', fontsize=20)
+        ax.set_ylabel('Normalizovaný tok', fontsize=20)
         canvas = FigureCanvasTkAgg(fig, master=window)
         canvas.draw()
         canvas.get_tk_widget().pack()
