@@ -342,6 +342,7 @@ checkbox_fillgaps.place(x=360, y=260)
 def plot_curve():
     global ffi_lc, tpf_lc, search, bkgstatus
     plt.close()
+
     if search == 'ffi':
         ffi_lc = ffi_data.to_lightcurve(aperture_mask=target_mask)
 
@@ -436,13 +437,15 @@ def save_curve():
         folder = obj_name.get()
 
         # txtcurve = str(obj_name.get()) + ' #' + sector_num.get() + '_ffi.txt'
-        txtcurve = str(obj_name.get()) + '_#' + sector_num.get() + '_s' + str(sect) + '_' + 'ffi.txt'
+        txtcurve = str(obj_name.get()) + '_#' + sector_num.get() + '_s' + str(sect) + '_' + 'ffi.dat'
         os.makedirs(folder, exist_ok=True)
         file_path = os.path.join(folder, txtcurve)
 
         with open(file_path, "w") as f:
             for row in ffi_lc:
-                line = str(row['time']) + ',' + str(row['flux'].value) + ',' + str(row['flux_err'].value) + '\n'
+                time = row['time']+2457000
+                # line = str(row['time']) + ',' + str(row['flux'].value) + ',' + str(row['flux_err'].value) + '\n'
+                line = str(time) + ',' + str(row['flux'].value) + ',' + str(row['flux_err'].value) + '\n'
                 f.write(line)
 
         # file = open(txtcurve, 'w')
