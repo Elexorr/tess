@@ -168,14 +168,14 @@ def opencurvefile():
     #     filey.append(float(line.split(' ')[1]))
 
     for i in range(1, len(lines)):
-        if float(lines[i].split(' ')[0]) > 2457000:
-            filex.append(float(lines[i].split(' ')[0])-2457000) ## -2457000
+        if float(lines[i].split(',')[0]) > 2457000:
+            filex.append(float(lines[i].split(',')[0])-2457000) ## -2457000
         else:
-            filex.append(float(lines[i].split(' ')[0]))
-        if 5 < float(lines[i].split(' ')[1]) < 20:
-            filey.append(float(lines[i].split(' ')[1])/10-1)
+            filex.append(float(lines[i].split(',')[0]))
+        if 5 < float(lines[i].split(',')[1]) < 20:
+            filey.append(float(lines[i].split(',')[1])/10-1)
         else:
-            filey.append(float(lines[i].split(' ')[1]))
+            filey.append(float(lines[i].split(',')[1]))
 
 
     fromfile = True
