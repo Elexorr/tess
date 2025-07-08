@@ -360,7 +360,7 @@ def plot_curve():
             bkg = ffi_data.estimate_background(aperture_mask='background')
             ffi_lc.flux = ffi_lc.flux - bkg.flux[quality_mask] * target_mask.sum() * u.pix
             # lightcurve_bkg = ffi_lc.plot(ax=axes[0, 1], label="BKG Subtracted")
-            lightcurve_bkg = ffi_lc.plot(ax=axes[1], label="BKG Subtracted")
+            lightcurve_bkg = ffi_lc.plot(ax=axes[1], marker = 'o', linestyle = 'None', label="BKG Subtracted")
         if regstatus.get() == 1:
             polyndeg = int(polynomial_degree_entry.get())
             if polyndeg == 1:
