@@ -347,7 +347,8 @@ def plot_curve():
             ffi_lc = ffi_lc[quality_mask]
             bkg = ffi_data.estimate_background(aperture_mask='background')
             ffi_lc.flux = ffi_lc.flux - bkg.flux[quality_mask] * target_mask.sum() * u.pix
-            lightcurve_bkg = ffi_lc.plot(ax=axes[0, 1], label="BKG Subtracted")
+            lightcurve_bkg = ffi_lc.plot(ax=axes[0, 1], marker = 'o', linestyle = 'None', label="BKG Subtracted")
+            ffi_lc_toprint = ffi_lc
         if regstatus.get() == 1:
             polyndeg = int(polynomial_degree_entry.get())
             if polyndeg == 1:
@@ -360,20 +361,23 @@ def plot_curve():
                 dm = DesignMatrix({'time': ffi_lc.time.value, 'time^2': ffi_lc.time.value ** 2, 'time^3': ffi_lc.time.value ** 3, 'time^4': ffi_lc.time.value ** 4})
             corrector = RegressionCorrector(ffi_lc)
             ffi_lc_corrected = corrector.correct(dm)
-            lightcurve_reg = ffi_lc_corrected.plot(ax=axes[1, 0], label="RegressionCorrector", color="red")
+            lightcurve_reg = ffi_lc_corrected.plot(ax=axes[1, 0], marker = 'o', linestyle = 'None', label="RegressionCorrector", color="red")
+            ffi_lc_toprint = ffi_lc_corrected
         if outstatus.get() == 1:
             ffi_lc_outlremoved = ffi_lc.remove_outliers(sigma=sigma_entry.get())
-            lightcurve_out = ffi_lc_outlremoved.plot(ax=axes[1, 1], label="Outliers Removed", color="brown")
+            lightcurve_out = ffi_lc_outlremoved.plot(ax=axes[1, 1], marker = 'o', linestyle = 'None', label="Outliers Removed", color="brown")
+            ffi_lc_toprint = ffi_lc_outlremoved
         if remnanstatus.get() == 1:
             ffi_lc_outlremoved = ffi_lc_outlremoved.remove_nans()
+            ffi_lc_toprint = ffi_lc_outlremoved
         if flatstatus.get() == 1:
-            print(ffi_lc_corrected)
             ffi_lc_flat = ffi_lc_outlremoved.flatten(window_length=int(window_length_entry.get()))
-            print(ffi_lc_flat)
-            lightcurve_flatten = ffi_lc_flat.plot(ax=axes[2, 0], label="Flatten w_l= "+window_length_entry.get())
+            lightcurve_flatten = ffi_lc_flat.plot(ax=axes[2, 0], marker = 'o', linestyle = 'None', label="Flatten w_l= "+window_length_entry.get())
+            ffi_lc_toprint = ffi_lc_flat
         if fillstatus.get() == 1:
             ffi_lc_flat = ffi_lc_flat.fill_gaps(method='gaussian_noise')
-            lightcurve_fill = ffi_lc_flat.plot(ax=axes[2, 1], label="Gaussian Noise")
+            lightcurve_fill = ffi_lc_flat.plot(ax=axes[2, 1], marker = 'o', linestyle = 'None', label="Gaussian Noise")
+            ffi_lc_toprint = ffi_lc_flat
 
     elif search == 'tpf':
         tpf_lc = tpf_data.to_lightcurve(aperture_mask=target_mask)
@@ -413,12 +417,12 @@ def plot_curve():
 
 
 def save_curve():
-    global ffi_lc, tpf_lc, sect
+    global ffi_lc, ffi_lc_toprint, tpf_lc, sect
     if search == 'ffi':
         # txtcurve = str(obj_name.get()) + ' #' + sector_num.get() + '_ffi.txt'
         txtcurve = str(obj_name.get()) +  '_#' + sector_num.get() + '_s' + str(sect) + '_' + 'ffi.txt'
         file = open(txtcurve, 'w')
-        for row in ffi_lc:
+        for row in ffi_lc_toprint:
             line = str(row['time']) + ' ' + str(row['flux'].value) + ' ' + str(row['flux_err'].value) + '\n'
             file.write(line)
         file.close()
