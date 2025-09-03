@@ -167,15 +167,19 @@ def opencurvefile():
     #     filex.append(float(line.split(' ')[0]))
     #     filey.append(float(line.split(' ')[1]))
 
+    # for i in range(1, len(lines)):
+    #     if float(lines[i].split(' ')[0]) > 2457000:
+    #         filex.append(float(lines[i].split(' ')[0])) ## -2457000
+    #     else:
+    #         filex.append(float(lines[i].split(' ')[0]))
+    #     if 5 < float(lines[i].split(' ')[1]) < 20:
+    #         filey.append(float(lines[i].split(' ')[1])/10-1)
+    #     else:
+    #         filey.append(float(lines[i].split(' ')[1]))
+
     for i in range(1, len(lines)):
-        if float(lines[i].split(',')[0]) > 2457000:
-            filex.append(float(lines[i].split(',')[0])-2457000) ## -2457000
-        else:
-            filex.append(float(lines[i].split(',')[0]))
-        if 5 < float(lines[i].split(',')[1]) < 20:
-            filey.append(float(lines[i].split(',')[1])/10-1)
-        else:
-            filey.append(float(lines[i].split(',')[1]))
+        filex.append(float(lines[i].split(' ')[0]))
+        filey.append(float(lines[i].split(' ')[1]))
 
 
     fromfile = True
@@ -221,6 +225,9 @@ def curve_plot():
     global fromfile
     global xx
     global yy
+    global vlines
+
+    vlines = 0
 
     window = tk.Canvas(master=root, width=screen_x - 558, height=screen_y - 50, bg='white')
     window.grid(row=0, column=1, sticky='N')
@@ -244,10 +251,10 @@ def curve_plot():
         # T.insert(INSERT, 'Data sample: ' + str(x[0]) + ' ' + str(y[0]))
         # T.see(tk.END)
 
-        if y[1] > 20:
-            divisor = 100000
-            result = [(a / divisor - 2) for a in y]
-            y = result
+        # if y[1] > 20:
+        #     divisor = 100000
+        #     result = [(a / divisor - 2) for a in y]
+        #     y = result
 
         xx = []
         yy = []
@@ -345,6 +352,15 @@ JDend_label.place(x=260, y=90)
 JDend_entered = ttk.Entry(frame1, width=10)
 JDend_entered.place(x=320, y=90)
 
+period_label = tk.Label(master=frame1, font=('Helvetica', 10), text='Period:', bg='grey')
+period_label.place(x=265, y=115)
+period_entered = ttk.Entry(frame1, width=10)
+period_entered.place(x=320, y=115)
+t0label = tk.Label(master=frame1, font=('Helvetica', 10), text='t0:', bg='grey')
+t0label.place(x=290, y=140)
+t0label_entered = ttk.Entry(frame1, width=10)
+t0label_entered.place(x=320, y=140)
+
 
 def clear_JD():
     JDstart_entered.delete(0, END)
@@ -425,8 +441,7 @@ def fitprocessing():
         print('Tmin (Gaussian): ', GTmin)
         T.insert(INSERT, '\n')
         T.insert(INSERT, 'Tmin (Gaussian): ' + str(GTmin) + '(' + str(mean_error) + ')')
-        T.see(tk.END)
-
+        FullGTmin = GTmin + 2457000.0
 
         # if isinstance(fit_g, Fitter) and fit_g.fit_info['param_cov'] is not None:
         #     param_cov = fit_g.fit_info['param_cov']
@@ -580,10 +595,10 @@ def save_cutted():
 
 
 save_curve_button = ttk.Button(frame1, text='Save Curve', command=save_curve)
-save_curve_button.place(x=400, y=87)
+save_curve_button.place(x=400, y=107)
 
 save_cutted_button = ttk.Button(frame1, text='Save Cutted', command=save_cutted)
-save_cutted_button.place(x=400, y=117)
+save_cutted_button.place(x=400, y=137)
 
 
 kepler_label = tk.Label(master=frame1, font=('Helvetica', 10), text='Kepler Eclipsing Binary Catalog', bg='grey')
@@ -619,7 +634,11 @@ def read_kic_id():
         print(period)
         print(t0)
         period = float(period)
+        period_entered.delete(0, END)
+        period_entered.insert(0, period)
         t0 = float(t0)
+        t0label_entered.delete(0, END)
+        t0label_entered.insert(0, t0)
         print(period)
         print(t0)
 
@@ -664,7 +683,11 @@ def find_tic():
         print(period)
         print(t0)
         period = float(period)
+        period_entered.delete(0, END)
+        period_entered.insert(0, period)
         t0 = float(t0)
+        t0label_entered.delete(0, END)
+        t0label_entered.insert(0, t0)
         print(period)
         print(t0)
 
@@ -708,12 +731,15 @@ find_tic_button.place(x=300, y=248)
 
 
 def plot_phased():
-    global period
-    if 'period' in globals():
+    # global period
+    if period_entered.get() != '':
+        period = float(period_entered.get())
+        t0 = float(t0label_entered.get())
+    # if 'period' in globals():
         global window
         window = tk.Canvas(master=root, width=screen_x - 558, height=screen_y - 50, bg='white')
         window.grid(row=0, column=1, sticky='N')
-        folded_lcf = lcf[int(sector_num.get())].fold(period, t0)
+        folded_lcf = lcf[int(sector_num.get())].fold(period, t0, epoch_phase=0.0, wrap_phase=0.5, normalize_phase=True)
         # print(folded_lcf)
         x = folded_lcf.time.value
         y = folded_lcf.flux
@@ -740,6 +766,62 @@ def plot_phased():
         canvas._tkcanvas.pack()
     else:
         showinfo(title='Plot phased', message='Period and M0 not defined')
+
+def plot_phased_from_file():
+    global filex
+    global filey
+    phases = []  # fázy
+
+    if 'filex' in globals():
+        print(filex)
+        print(filey)
+    else:
+        showinfo(title='Plot phased', message='No File Loaded')
+
+    if period_entered.get() != '':
+        period = float(period_entered.get())
+        t0 = float(t0label_entered.get())
+
+        for time in filex:
+            phase = ((time - t0) / period) % 1
+            if phase > 0.5:
+                phase = phase - 1
+            phases.append(phase)
+        print('Phases:')
+        print(phases)
+
+        # ak chceš -1 → +1
+        # phases = phases * 2
+        global window
+        window = tk.Canvas(master=root, width=screen_x - 558, height=screen_y - 50, bg='white')
+        window.grid(row=0, column=1, sticky='N')
+
+        figx = (screen_x-558)/100
+        figy = (figx * 0.5625)
+        fig = plt.Figure(figsize=(figx, figy), dpi = 100)
+        #fig.add_subplot(111).plot(x, y, "ro")
+        # fig.add_subplot(111).plot(x, y, color='blue', marker='o', linestyle='dashed',
+        #  linewidth=1, markersize=4)
+        ax = fig.add_subplot(111)
+        # ax.plot(phases, filey, color='blue', marker='o', linestyle='dashed', linewidth=1, markersize=4)
+        ax.plot(phases, filey, color='blue', marker='o', linestyle = 'None', markersize=4)
+        # ax.plot(xx, yy, 'b', marker='o', linestyle='dashed', linewidth=1, markersize=4)
+        ax.set_xlabel('Fáza', fontsize=20)
+        ax.set_ylabel('Normalizovaný tok', fontsize=20)
+        canvas = FigureCanvasTkAgg(fig, master=window)
+        canvas.draw()
+        canvas.get_tk_widget().pack()
+        toolbar = NavigationToolbar2Tk(canvas, window)
+        toolbar.update()
+        canvas._tkcanvas.pack()
+
+
+    else:
+        showinfo(title='Plot phased', message='Period and M0 not defined')
+
+
+plot_phased_from_file_button = ttk.Button(frame1, text='From File', command=plot_phased_from_file)
+plot_phased_from_file_button.place(x=400, y=65)
 
 
 def frame():
