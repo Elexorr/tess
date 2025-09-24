@@ -181,9 +181,12 @@ def opencurvefile():
     #         filey.append(float(lines[i].split(' ')[1]))
 
     for i in range(1, len(lines)):
-        filex.append(float(lines[i].split(',')[0]))
-        filey.append(float(lines[i].split(',')[1]))
-
+        if ',' in lines[i]:
+            filex.append(float(lines[i].split(',')[0]))
+            filey.append(float(lines[i].split(',')[1]))
+        else:
+            filex.append(float(lines[i].split(' ')[0]))
+            filey.append(float(lines[i].split(' ')[1]))
 
     fromfile = True
 
