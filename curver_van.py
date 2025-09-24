@@ -376,20 +376,20 @@ def plot_curve():
                      'time^4': ffi_lc.time.value ** 4})
             corrector = RegressionCorrector(ffi_lc)
             ffi_lc_corrected = corrector.correct(dm)
-            lightcurve_reg = ffi_lc_corrected.plot(ax=axes[1, 0], label="RegressionCorrector", color="red")
+            lightcurve_reg = ffi_lc_corrected.plot(ax=axes[1, 0], arker = 'o', linestyle = 'None', label="RegressionCorrector", color="red")
         if outstatus.get() == 1:
             ffi_lc_outlremoved = ffi_lc.remove_outliers(sigma=sigma_entry.get())
-            lightcurve_out = ffi_lc_outlremoved.plot(ax=axes[1, 1], label="Outliers Removed", color="brown")
+            lightcurve_out = ffi_lc_outlremoved.plot(ax=axes[1, 1], arker = 'o', linestyle = 'None', label="Outliers Removed", color="brown")
         if remnanstatus.get() == 1:
             ffi_lc_outlremoved = ffi_lc_outlremoved.remove_nans()
         if flatstatus.get() == 1:
             print(ffi_lc_corrected)
             ffi_lc_flat = ffi_lc_outlremoved.flatten(window_length=int(window_length_entry.get()))
             print(ffi_lc_flat)
-            lightcurve_flatten = ffi_lc_flat.plot(ax=axes[2, 0], label="Flatten w_l= " + window_length_entry.get())
+            lightcurve_flatten = ffi_lc_flat.plot(ax=axes[2, 0], arker = 'o', linestyle = 'None', label="Flatten w_l= " + window_length_entry.get())
         if fillstatus.get() == 1:
             ffi_lc_flat = ffi_lc_flat.fill_gaps(method='gaussian_noise')
-            lightcurve_fill = ffi_lc_flat.plot(ax=axes[2, 1], label="Gaussian Noise")
+            lightcurve_fill = ffi_lc_flat.plot(ax=axes[2, 1], arker = 'o', linestyle = 'None', label="Gaussian Noise")
 
     elif search == 'tpf':
         tpf_lc = tpf_data.to_lightcurve(aperture_mask=target_mask)

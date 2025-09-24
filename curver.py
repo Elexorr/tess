@@ -331,7 +331,7 @@ checkbox_fillgaps = tk.Checkbutton(master=frame1, text='Fill Gaps', variable=fil
 checkbox_fillgaps.place(x=360, y=260)
 
 def plot_curve():
-    global ffi_lc, tpf_lc, search, bkgstatus
+    global ffi_lc, tpf_lc, ffi_lc_toprint, search, bkgstatus
     plt.close()
     if search == 'ffi':
         ffi_lc = ffi_data.to_lightcurve(aperture_mask=target_mask)
@@ -423,7 +423,7 @@ def save_curve():
         txtcurve = str(obj_name.get()) +  '_#' + sector_num.get() + '_s' + str(sect) + '_' + 'ffi.txt'
         file = open(txtcurve, 'w')
         for row in ffi_lc_toprint:
-            line = str(row['time']) + ' ' + str(row['flux'].value) + ' ' + str(row['flux_err'].value) + '\n'
+            line = str(row['time'] + 2457000) + ' ' + str(row['flux'].value) + ' ' + str(row['flux_err'].value) + '\n'
             file.write(line)
         file.close()
     if search == 'tpf':
