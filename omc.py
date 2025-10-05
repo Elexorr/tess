@@ -29,10 +29,9 @@ for i in range(0, len(o)):
     # E = np.floor(E_frac)
     # print(E_frac,E)
     c.append((o[0]) + period*E)
-    omc.append(round(o[i]-c[i],5))
+    omc.append(round(o[i]-c[i],7))
 
 # print(len(o), len(c))
-
 
 for i in range(len(omc)):
     print(omc[i])
