@@ -22,7 +22,6 @@ import csvtodat
 import requests
 # import pandas as pd
 
-
 root = tk.Tk()
 root.title('TESS project v0.5')
 root.state('zoomed')
@@ -331,7 +330,8 @@ def curve_plot():
     print(yy)
     # ax.plot(xx, yy, 'b', marker='o', linestyle='dashed', linewidth=1, markersize=4)
     ax.scatter(xx, yy, color='blue', s=10, marker='o')
-    ax.set_xlabel('BJD-2457000', fontsize=20)
+    # ax.set_xlabel('BJD-2457000', fontsize=20)
+    ax.set_xlabel('phase', fontsize=20)
     ax.set_ylabel('Flux', fontsize=20)
     plt.xlabel('X-ová os')
     # EXPERIMENTAL ROWS TO ADD FIT CURVE / ked bude treba
