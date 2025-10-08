@@ -12,8 +12,8 @@ print(f"Otvorím súbor: {subor}")
 #     obsah = f.read()
 #     print(obsah)
 
-# readf = open(subor, 'r')
-# lines = readf.readlines()
+readf = open(subor, 'r')
+lines = readf.readlines()
 # print(lines)
 
 JD = []  # cas
