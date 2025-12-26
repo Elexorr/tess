@@ -1,7 +1,7 @@
 import os
 from PIL import Image, ImageDraw, ImageFont
 
-input_dir = "images"
+input_dir = "pics"
 output_dir = "output"
 os.makedirs(output_dir, exist_ok=True)
 
